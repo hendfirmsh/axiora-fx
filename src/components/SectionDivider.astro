@@ -1,0 +1,33 @@
+---
+/**
+ * SectionDivider — mark meaningful transitions.
+ *
+ * Authority: 10_Component_Inventory.md (Section Divider: "Never replaces a
+ *            heading or creates decorative noise"; states default, labelled).
+ *
+ * A divider is a TRANSITION signal, not a heading substitute. It may carry a
+ * short label when the transition is between named sections (e.g. between the
+ * evidence block and the sources block), but the label is supplementary — the
+ * heading that follows still carries the semantic structure.
+ *
+ * When no label is provided the element is aria-hidden: a purely visual
+ * separator adds no information for assistive technology.
+ */
+
+interface Props {
+  /** Optional short label naming the transition. */
+  label?: string;
+}
+
+const { label } = Astro.props;
+---
+
+{
+  label ? (
+    <div class="axf-divider axf-divider-labelled" role="separator" aria-label={label}>
+      <span class="axf-divider-label">{label}</span>
+    </div>
+  ) : (
+    <hr class="axf-divider" aria-hidden="true" />
+  )
+}

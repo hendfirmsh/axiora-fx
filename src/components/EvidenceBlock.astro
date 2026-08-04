@@ -1,0 +1,76 @@
+---
+/**
+ * EvidenceBlock — separate observed/source-backed material from interpretation.
+ *
+ * Authority: 10_Component_Inventory.md (Evidence Block: "Labels evidence versus
+ *            interpretation and links sources"; states complete, incomplete
+ *            validation, cited),
+ *            13_Accessibility_Workspace.md:30 ("Evidence is labelled as evidence,
+ *            interpretation as interpretation, and uncertainty as uncertainty in
+ *            text — not just through visual treatment"),
+ *            09_Reading_Flows.md:5 (evidence follows the brief answer).
+ *
+ * The distinction between a verified fact and an interpretation is carried by
+ * TEXT, not by colour or border alone. The claim-class label is the textual
+ * carrier; the visual treatment is supplementary.
+ *
+ * FIELD DISCIPLINE: claimClass maps to the Content Model's claimClasses field.
+ * No prop invents a field outside the model.
+ */
+
+import { CLAIM_CLASS_LABELS } from '../lib/labels.ts';
+import type { ClaimClass } from '../lib/taxonomy.ts';
+
+interface EvidenceItem {
+  claimClass: ClaimClass;
+  /** The evidence statement itself. */
+  content: string;
+  /** Optional source reference by title, for inline attribution. */
+  sourceTitle?: string;
+}
+
+interface Props {
+  items: EvidenceItem[];
+  /** Heading level so the block nests correctly in the page outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { items, headingLevel = 2 } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+---
+
+<section class="axf-evidence" aria-labelledby="axf-evidence-heading">
+  <Heading id="axf-evidence-heading" class="axf-section-heading">Bukti</Heading>
+
+  {
+    items.length === 0 ? (
+      <p class="axf-evidence-empty">
+        Blok bukti ini belum memiliki entri. Catatan tanpa bukti tidak memenuhi
+        standar publikasi AXIORA.
+      </p>
+    ) : (
+      <ol class="axf-evidence-list">
+        {items.map((item) => (
+          <li class={`axf-evidence-item axf-evidence-${item.claimClass}`}>
+            {/*
+              The claim-class label is the primary semantic carrier. It must
+              appear before the content so a screen reader announces the class
+              before reading the claim, not after.
+            */}
+            <span class="axf-evidence-class">
+              {CLAIM_CLASS_LABELS[item.claimClass]}
+            </span>
+
+            <p class="axf-evidence-content">{item.content}</p>
+
+            {item.sourceTitle && (
+              <span class="axf-evidence-source-ref">
+                Sumber: <cite>{item.sourceTitle}</cite>
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+    )
+  }
+</section>

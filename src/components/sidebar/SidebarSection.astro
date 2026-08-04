@@ -1,0 +1,8 @@
+---
+interface Props { label: string; }
+const { label } = Astro.props;
+---
+<section class="axf-sidebar-section" aria-labelledby={`sidebar-${label.toLowerCase().replace(/\s+/g, '-')}`}>
+  <h2 class="axf-sidebar-section-title" id={`sidebar-${label.toLowerCase().replace(/\s+/g, '-')}`}>{label}</h2>
+  <div class="axf-sidebar-section-items"><slot /></div>
+</section>

@@ -1,0 +1,53 @@
+---
+import { ROUTES } from '../../lib/routes.ts';
+import { url } from '../../lib/url.ts';
+import { CORRECTIONS_EMAIL } from '../../lib/routes.ts';
+import SidebarIcon from './SidebarIcon.astro';
+
+interface Props { currentPath: string; }
+const { currentPath } = Astro.props;
+---
+<section class="axf-workspace-block" data-account-menu-root>
+  <button
+    class="axf-workspace-card"
+    type="button"
+    aria-haspopup="menu"
+    aria-controls="axf-account-menu"
+    aria-expanded="false"
+    title="Buka menu akun AXIORA FX"
+    data-account-menu-trigger
+  >
+    <span class="axf-sidebar-avatar" aria-hidden="true">HF</span>
+    <span class="axf-workspace-identity">
+      <strong>AXIORA FX</strong>
+      <span class="axf-workspace-user">Hendrik Firmansyah</span>
+      <small>Owner</small>
+    </span>
+    <span class="axf-account-menu-chevron" aria-hidden="true"><SidebarIcon name="chevron" /></span>
+  </button>
+
+  <div class="axf-account-menu" id="axf-account-menu" role="menu" aria-label="Menu akun AXIORA FX" hidden data-account-menu>
+    <div class="axf-account-menu-heading" aria-hidden="true">
+      <strong>Hendrik Firmansyah</strong>
+      <small>hendfirmsh</small>
+    </div>
+    <div class="axf-account-menu-group">
+      <a role="menuitem" href={url(ROUTES.console.path)} aria-current={currentPath === ROUTES.console.path ? 'page' : undefined}><SidebarIcon name="briefcase" />Workspace</a>
+      <a role="menuitem" href={`${url(ROUTES.console.path)}#profile`}><SidebarIcon name="activity" />Profile</a>
+      <a role="menuitem" href={`${url(ROUTES.console.path)}#workspaces`}><SidebarIcon name="settings" />Manage Workspace</a>
+    </div>
+    <div class="axf-account-menu-group">
+      <a role="menuitem" href={url(ROUTES.settings.path)} aria-current={currentPath === ROUTES.settings.path ? 'page' : undefined}><SidebarIcon name="settings" />Settings</a>
+      <button role="menuitem" type="button" data-theme-toggle><SidebarIcon name="moon" />Appearance <small data-theme-label>Mode terang</small></button>
+      <a role="menuitem" href={`${url(ROUTES.settings.path)}#keyboard-shortcuts`}><SidebarIcon name="keyboard" />Keyboard Shortcuts</a>
+    </div>
+    <div class="axf-account-menu-group">
+      <a role="menuitem" href={url(ROUTES.methodology.path)}><SidebarIcon name="support" />Help Center</a>
+      <a role="menuitem" href={`mailto:${CORRECTIONS_EMAIL}`}><SidebarIcon name="feedback" />Feedback</a>
+      <a role="menuitem" href={url(ROUTES.education.path)}><SidebarIcon name="book" />Documentation</a>
+    </div>
+    <div class="axf-account-menu-group">
+      <button role="menuitem" type="button" data-account-signout><SidebarIcon name="signout" />Sign Out</button>
+    </div>
+  </div>
+</section>

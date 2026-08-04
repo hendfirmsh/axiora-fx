@@ -1,0 +1,102 @@
+---
+/**
+ * WorkspaceHeader — orientation, navigation control, and search entry.
+ *
+ * Authority: 04_Workspace_Architecture/02_Application_Shell.md:12 (sticky header),
+ *            02_Application_Shell.md:33 (search placement),
+ *            10_Component_Inventory.md (Workspace Header: desktop, tablet, mobile),
+ *            11_Interaction_Specification.md:13 (drawer),
+ *            decision K-18 (touch targets).
+ *
+ * Component_Inventory requires the header to show "current context, navigation
+ * control, and search entry", with desktop/tablet/mobile states.
+ *
+ * The three responsibilities are separated deliberately:
+ *
+ *   - Current context is TEXT, not a decorative title bar. It repeats the page
+ *     title so orientation survives scrolling on mobile, where the breadcrumb
+ *     has scrolled out of view.
+ *
+ *   - The navigation control is the <summary> of the drawer that lives in the
+ *     layout. This component therefore does NOT own the drawer element; it
+ *     points at it. That keeps a single <details> element in the DOM, so there
+ *     is one open-state and one focus target rather than two competing ones.
+ *
+ *   - Search entry is a LINK to the search route, never an inline input in the
+ *     shell. An input in the header would have to submit somewhere, and with no
+ *     server there is nothing to submit to. A link degrades perfectly without
+ *     JavaScript (11_Interaction_Specification.md:57) and cannot imply real-time
+ *     or personalized search (02_Application_Shell.md:33).
+ *
+ * STICKY BOUNDARY: Component_Inventory (Sticky Elements) requires that sticky
+ * regions "never cover content or trap keyboard focus", and Application_Shell.md:12
+ * requires the header never obscure source or correction content. The header is
+ * therefore a single short row with no expanding panel; scroll-margin on headings
+ * is handled in CSS so an anchored heading is not hidden beneath it.
+ */
+
+import { ROUTES } from '../lib/routes.ts';
+import { isRouteReady } from '../lib/route-readiness.ts';
+import { url } from '../lib/url.ts';
+
+interface Props {
+  /** Current page title, shown as orientation context. */
+  title: string;
+  /** id of the drawer <details> this header's control operates. */
+  drawerId: string;
+}
+
+const { title, drawerId } = Astro.props;
+
+/*
+ * Search is linked whether or not its content is ready. The route always exists
+ * and explains its own state, so the reader gets an honest answer instead of a
+ * missing control. Readiness only changes the accessible description, so assistive
+ * technology announces the state before the reader commits to the navigation.
+ */
+const searchReady = isRouteReady(ROUTES.search.path);
+---
+
+<header class="axf-header">
+  {/*
+    Navigation control. This is a <label> bound to the drawer's <summary> via
+    aria-controls; the actual toggle is the summary element itself, which the
+    layout renders inside the sidebar. On desktop the drawer is always open and
+    this control is hidden by CSS, matching the desktop/tablet/mobile states.
+  */}
+  <a class="axf-header-nav-control axf-touch-target" href={`#${drawerId}`} aria-controls={drawerId} aria-expanded="false" data-drawer-toggle>
+    <span aria-hidden="true">&#9776;</span>
+    <span class="axf-visually-hidden">Buka navigasi pengetahuan</span>
+  </a>
+
+  <a class="axf-wordmark axf-header-wordmark" href={url(ROUTES.home.path)}>
+    <span class="axf-wordmark-mark" aria-hidden="true">A</span>
+    <span>AXIORA</span>
+  </a>
+
+  {/*
+    Current context. aria-hidden because the same string is already the page's
+    <title> and its <h1>; announcing it a third time adds noise without adding
+    orientation for a screen-reader user.
+  */}
+  <span class="axf-header-context" aria-hidden="true">{title}</span>
+
+  <a
+    class="axf-header-search axf-touch-target"
+    href={url(ROUTES.search.path)}
+    aria-label="Cari di AXIORA"
+    aria-describedby={searchReady ? undefined : 'axf-search-state'}
+  >
+    <span aria-hidden="true">/</span>
+    <span>Cari di AXIORA</span>
+    <kbd aria-hidden="true">Ctrl K</kbd>
+  </a>
+
+  {
+    !searchReady && (
+      <span id="axf-search-state" class="axf-visually-hidden">
+        Pencarian belum memiliki korpus yang dipublikasikan.
+      </span>
+    )
+  }
+</header>

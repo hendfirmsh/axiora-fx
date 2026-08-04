@@ -1,0 +1,19 @@
+---
+/**
+ * Methodology.
+ *
+ * Authority: 06_Page_Inventory.md:17, 05_Sitemap.md:43.
+ *
+ * Group 6 replaces this page with the full methodology document.
+ */
+
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES } from '../../lib/routes.ts';
+---
+
+<PendingRoutePage
+  path={ROUTES.methodology.path}
+  title={ROUTES.methodology.title}
+  description={ROUTES.methodology.description}
+  breadcrumbs={[{ label: 'AXIORA', path: ROUTES.home.path }, { label: ROUTES.methodology.title }]}
+/>

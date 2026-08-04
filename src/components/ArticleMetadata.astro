@@ -1,0 +1,126 @@
+---
+/**
+ * ArticleMetadata — expose provenance and scope.
+ *
+ * Authority: 04_Workspace_Architecture/10_Component_Inventory.md (Article Metadata),
+ *            06_Page_Inventory.md:12 (trust elements),
+ *            13_Accessibility_Workspace.md:30
+ *
+ * "Owner/review/publication/status data is machine and human readable"
+ * (Component_Inventory). Dates therefore carry a <time datetime> attribute
+ * alongside the Indonesian reading form.
+ *
+ * A non-current status renders BOTH a badge and a prose explanation, because
+ * Component_Inventory forbids a badge being the only expression of correction,
+ * archival, or future state.
+ */
+
+import Badge from './Badge.astro';
+import {
+  CONTENT_TYPE_LABELS,
+  STATUS_LABELS,
+  formatDate,
+  machineDate,
+  statusExplanation,
+} from '../lib/labels.ts';
+import type { ContentType, LifecycleStatus } from '../lib/taxonomy.ts';
+
+interface Props {
+  contentType: ContentType;
+  status: LifecycleStatus;
+  owner: string;
+  version: string;
+  publicationDate?: Date;
+  lastReviewedDate?: Date;
+  nextReviewTrigger?: string;
+  reviewers?: string[];
+  disclosure?: string;
+}
+
+const {
+  contentType,
+  status,
+  owner,
+  version,
+  publicationDate,
+  lastReviewedDate,
+  nextReviewTrigger,
+  reviewers = [],
+  disclosure,
+} = Astro.props;
+
+const explanation = statusExplanation(status);
+---
+
+<section class="axf-metadata" aria-label="Provenans dan cakupan">
+  <div class="axf-metadata-badges">
+    <Badge kind="content-type" dimension="Jenis" label={CONTENT_TYPE_LABELS[contentType]} />
+    <Badge kind="status" dimension="Status" label={STATUS_LABELS[status]} />
+  </div>
+
+  {/* Required by Component_Inventory: a badge alone may not carry a non-current state. */}
+  {explanation && <p class="axf-metadata-status-note">{explanation}</p>}
+
+  <dl class="axf-metadata-list">
+    <div class="axf-metadata-row">
+      <dt>Pemilik</dt>
+      <dd>{owner}</dd>
+    </div>
+
+    <div class="axf-metadata-row">
+      <dt>Versi</dt>
+      <dd>{version}</dd>
+    </div>
+
+    {
+      publicationDate && (
+        <div class="axf-metadata-row">
+          <dt>Dipublikasikan</dt>
+          <dd>
+            <time datetime={machineDate(publicationDate)}>{formatDate(publicationDate)}</time>
+          </dd>
+        </div>
+      )
+    }
+
+    {
+      lastReviewedDate && (
+        <div class="axf-metadata-row">
+          <dt>Ditinjau terakhir</dt>
+          <dd>
+            <time datetime={machineDate(lastReviewedDate)}>{formatDate(lastReviewedDate)}</time>
+          </dd>
+        </div>
+      )
+    }
+
+    {
+      nextReviewTrigger && (
+        <div class="axf-metadata-row">
+          <dt>Pemicu tinjauan berikutnya</dt>
+          <dd>{nextReviewTrigger}</dd>
+        </div>
+      )
+    }
+
+    <div class="axf-metadata-row">
+      <dt>Peninjau</dt>
+      <dd>
+        {
+          reviewers.length > 0
+            ? reviewers.join(', ')
+            : 'Belum ada peninjau yang ditugaskan untuk catatan ini.'
+        }
+      </dd>
+    </div>
+  </dl>
+
+  {
+    disclosure && (
+      <div class="axf-disclosure">
+        <h3 class="axf-disclosure-heading">Pengungkapan</h3>
+        <p>{disclosure}</p>
+      </div>
+    )
+  }
+</section>

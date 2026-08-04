@@ -1,0 +1,11 @@
+---
+import SidebarIcon from './SidebarIcon.astro';
+interface Props { label: string; open?: boolean; }
+const { label, open = false } = Astro.props;
+---
+<details class="axf-sidebar-group axf-nav-group" open={open}>
+  <summary class="axf-sidebar-group-trigger">
+    <span class="axf-nav-group-label">{label}</span><span class="axf-sidebar-icon-box"><SidebarIcon name="chevron" /></span>
+  </summary>
+  <div class="axf-sidebar-group-items"><slot /></div>
+</details>

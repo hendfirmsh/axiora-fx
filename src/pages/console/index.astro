@@ -1,0 +1,9 @@
+---
+import WorkspaceLayout from '../../layouts/WorkspaceLayout.astro';
+import ConsoleApp from '../../components/ConsoleApp.astro';
+import { ROUTES } from '../../lib/routes';
+---
+
+<WorkspaceLayout title={ROUTES.console.title} description={ROUTES.console.description} indexable={false}>
+  <ConsoleApp />
+</WorkspaceLayout>

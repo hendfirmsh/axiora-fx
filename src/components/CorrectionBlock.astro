@@ -1,0 +1,108 @@
+---
+/**
+ * CorrectionBlock — surface material corrections.
+ *
+ * Authority: 10_Component_Inventory.md (Correction Block: "States issue,
+ *            correction, date, impact, and record link"; states active
+ *            correction, resolved record),
+ *            06_Page_Inventory.md:18 (corrections index/detail),
+ *            06_Page_Inventory.md:22 ("no hidden edits"),
+ *            decision K-03 (correction record fields),
+ *            13_Accessibility_Workspace.md:30 ("Corrections state what changed
+ *            and why").
+ *
+ * FIELD BINDING: every field rendered here exists on correctionSchema in
+ * src/lib/schemas.ts, which encodes the K-03 field list: date, affected section,
+ * incorrect claim, change, impact, reviewer, previous version, current version.
+ * This component adds none and omits none — a correction record that displayed
+ * less than it recorded would be a hidden edit by presentation.
+ *
+ * DISCLOSURE BOUNDARY: 11_Interaction_Specification.md:23 permits disclosure to
+ * shorten secondary material but forbids hiding corrections from the core reading
+ * path. This component therefore renders corrections OPEN, as flat prose. It is
+ * deliberately not a <details> element.
+ */
+
+import { formatDate, machineDate } from '../lib/labels.ts';
+
+interface Correction {
+  date: Date;
+  affectedSection: string;
+  incorrectClaim: string;
+  change: string;
+  impact: string;
+  reviewer: string;
+  previousVersion: string;
+  currentVersion: string;
+}
+
+interface Props {
+  corrections: Correction[];
+  /** Heading level so the block nests correctly in the page outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { corrections, headingLevel = 2 } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+---
+
+{
+  corrections.length > 0 && (
+    <section class="axf-corrections" aria-labelledby="axf-corrections-heading">
+      <Heading id="axf-corrections-heading" class="axf-section-heading">
+        Koreksi
+      </Heading>
+
+      <p class="axf-corrections-intro">
+        Koreksi material dicatat secara terbuka. Versi sebelumnya tidak dihapus
+        dari catatan.
+      </p>
+
+      <ol class="axf-correction-list">
+        {corrections.map((correction) => (
+          <li class="axf-correction">
+            <p class="axf-correction-date">
+              <time datetime={machineDate(correction.date)}>
+                {formatDate(correction.date)}
+              </time>
+            </p>
+
+            <dl class="axf-correction-fields">
+              <div class="axf-correction-field">
+                <dt>Bagian terdampak</dt>
+                <dd>{correction.affectedSection}</dd>
+              </div>
+
+              <div class="axf-correction-field">
+                <dt>Klaim yang keliru</dt>
+                <dd>{correction.incorrectClaim}</dd>
+              </div>
+
+              <div class="axf-correction-field">
+                <dt>Perubahan</dt>
+                <dd>{correction.change}</dd>
+              </div>
+
+              <div class="axf-correction-field">
+                <dt>Dampak</dt>
+                <dd>{correction.impact}</dd>
+              </div>
+
+              <div class="axf-correction-field">
+                <dt>Peninjau</dt>
+                <dd>{correction.reviewer}</dd>
+              </div>
+
+              <div class="axf-correction-field">
+                <dt>Versi</dt>
+                <dd>
+                  {correction.previousVersion} &rarr; {correction.currentVersion}
+                </dd>
+              </div>
+            </dl>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}

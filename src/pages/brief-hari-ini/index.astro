@@ -1,0 +1,21 @@
+---
+/**
+ * Today's Brief.
+ *
+ * Authority: 06_Page_Inventory.md:10 ("Required when corpus exists"),
+ *            05_Sitemap.md:36.
+ *
+ * Content readiness is tracked in src/lib/route-readiness.ts. Group 11 replaces
+ * this with the dated collection page once a curated corpus is approved.
+ */
+
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES } from '../../lib/routes.ts';
+---
+
+<PendingRoutePage
+  path={ROUTES.todaysBrief.path}
+  title={ROUTES.todaysBrief.title}
+  description={ROUTES.todaysBrief.description}
+  breadcrumbs={[{ label: 'AXIORA', path: ROUTES.home.path }, { label: ROUTES.todaysBrief.title }]}
+/>

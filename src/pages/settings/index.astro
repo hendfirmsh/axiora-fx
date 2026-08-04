@@ -1,0 +1,63 @@
+---
+import WorkspaceLayout from '../../layouts/WorkspaceLayout.astro';
+import { ROUTES } from '../../lib/routes.ts';
+---
+
+<WorkspaceLayout title={ROUTES.settings.title} description={ROUTES.settings.description} indexable={false}>
+  <section class="axf-settings" aria-labelledby="settings-title">
+    <p class="axf-overline">WORKSPACE / PREFERENCES</p>
+    <h1 id="settings-title">Settings</h1>
+    <p class="axf-settings-lead">Atur tampilan AXIORA pada perangkat ini. Preferensi tersimpan otomatis di browser.</p>
+
+    <section class="axf-settings-card" aria-labelledby="appearance-title">
+      <div>
+        <p class="axf-overline">APPEARANCE</p>
+        <h2 id="appearance-title">Mode tampilan</h2>
+        <p>Pilih tema yang nyaman untuk membaca intelligence workspace.</p>
+      </div>
+      <div class="axf-theme-options" role="group" aria-label="Pilih mode tampilan">
+        <button type="button" data-theme-option="dark" aria-pressed="false">
+          <span aria-hidden="true">&#9789;</span><strong>Gelap</strong><small>Fokus tinggi, cahaya rendah</small>
+        </button>
+        <button type="button" data-theme-option="light" aria-pressed="false">
+          <span aria-hidden="true">&#9788;</span><strong>Terang</strong><small>Kontras bersih untuk siang hari</small>
+        </button>
+      </div>
+    </section>
+
+    <section class="axf-settings-card" id="keyboard-shortcuts" aria-labelledby="keyboard-shortcuts-title">
+      <div>
+        <p class="axf-overline">KEYBOARD</p>
+        <h2 id="keyboard-shortcuts-title">Keyboard Shortcuts</h2>
+        <p>Akses pencarian dan navigasi utama tanpa meninggalkan keyboard.</p>
+      </div>
+      <p><kbd>Ctrl K</kbd> membuka pencarian AXIORA. Gunakan tombol panah untuk menavigasi menu akun.</p>
+    </section>
+
+    <section class="axf-settings-card" aria-labelledby="account-title">
+      <div>
+        <p class="axf-overline">ACCOUNT</p>
+        <h2 id="account-title">Akun dan workspace</h2>
+        <p>Login, profil, penggunaan, dan konfigurasi workspace dikelola dari AXIORA Console.</p>
+      </div>
+      <a class="axf-settings-link" href={ROUTES.console.path}>Buka Console <span aria-hidden="true">-&gt;</span></a>
+    </section>
+  </section>
+</WorkspaceLayout>
+
+<style>
+  .axf-settings { max-inline-size: 68rem; padding-block: var(--axf-space-6); }
+  .axf-settings > h1 { margin-block-start: var(--axf-space-3); font-size: var(--axf-font-size-4xl); letter-spacing: -.05em; }
+  .axf-settings-lead { max-inline-size: var(--axf-measure-reading); margin-block: var(--axf-space-5) var(--axf-space-10); color: var(--axf-color-text-secondary); font-size: var(--axf-font-size-lg); }
+  .axf-settings-card { display: grid; grid-template-columns: minmax(14rem, .8fr) minmax(20rem, 1.2fr); gap: var(--axf-space-8); padding-block: var(--axf-space-8); border-block-start: var(--axf-border-width) solid var(--axf-color-border); }
+  .axf-settings-card h2 { margin-block: var(--axf-space-2); font-size: var(--axf-font-size-xl); }
+  .axf-settings-card p { color: var(--axf-color-text-secondary); }
+  .axf-theme-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--axf-space-3); }
+  .axf-theme-options button { min-block-size: 9rem; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: var(--axf-space-2); padding: var(--axf-space-5); color: var(--axf-color-text-primary); background: var(--axf-color-surface-subtle); border: var(--axf-border-width) solid var(--axf-color-border); border-radius: var(--axf-radius-lg); font: inherit; text-align: start; cursor: pointer; }
+  .axf-theme-options button[aria-pressed='true'] { border-color: var(--axf-color-accent); box-shadow: inset 0 0 0 var(--axf-border-width) var(--axf-color-accent); }
+  .axf-theme-options button > span { font-size: var(--axf-font-size-2xl); }
+  .axf-theme-options small { color: var(--axf-color-text-tertiary); }
+  .axf-settings-link { align-self: center; justify-self: start; padding: var(--axf-space-3) var(--axf-space-5); color: var(--axf-color-text-inverse); background: var(--axf-color-accent); border-radius: var(--axf-radius-md); text-decoration: none; }
+  @media (max-width: 48em) { .axf-settings-card { grid-template-columns: 1fr; } }
+  @media (max-width: 32em) { .axf-theme-options { grid-template-columns: 1fr; } }
+</style>

@@ -1,0 +1,271 @@
+/*
+ * AXIORA base stylesheet.
+ *
+ * Authority: 04_Workspace_Architecture/07_Workspace_Layout.md,
+ *            04_Workspace_Architecture/12_Responsive_Workspace.md,
+ *            04_Workspace_Architecture/13_Accessibility_Workspace.md,
+ *            decision K-18 (touch targets).
+ *
+ * Hand-written CSS. No framework, no component library, no reset dependency.
+ * All values reference tokens.css; no literal colour or size is introduced here.
+ */
+
+@import './tokens.css';
+
+/* -------------------------------------------------------------------------
+ * Reset — minimal and intentional
+ * ---------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Never disable user scaling. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  margin: 0;
+  background-color: var(--axf-color-surface);
+  color: var(--axf-color-text-primary);
+  font-family: var(--axf-font-family-ui);
+  font-size: var(--axf-font-size-base);
+  line-height: var(--axf-line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  color-scheme: light dark;
+  background-image:
+    linear-gradient(var(--axf-color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--axf-color-border) 1px, transparent 1px);
+  background-size: 5rem 5rem;
+  background-position: center top;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: var(--axf-font-weight-semibold);
+  line-height: var(--axf-line-height-tight);
+  /* Heading level reflects the content model; size never dictates level. */
+  text-wrap: balance;
+}
+
+p,
+ul,
+ol,
+dl,
+figure,
+blockquote,
+table {
+  margin: 0;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* -------------------------------------------------------------------------
+ * Links
+ * ---------------------------------------------------------------------- */
+
+a {
+  color: var(--axf-color-link);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+a:visited {
+  color: var(--axf-color-link-visited);
+}
+
+::selection {
+  background: var(--axf-color-accent);
+  color: var(--axf-color-text-inverse);
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/*
+ * Inline text links are exempt from the 44x44 box requirement (K-18) but must
+ * have sufficient line-height and spacing to be touched without mis-taps.
+ */
+.axf-prose a {
+  line-height: var(--axf-line-height-relaxed);
+}
+
+/* -------------------------------------------------------------------------
+ * Focus — visible, never colour alone
+ * ---------------------------------------------------------------------- */
+
+:focus-visible {
+  outline: var(--axf-focus-ring-width) solid var(--axf-color-focus);
+  outline-offset: var(--axf-focus-ring-offset);
+  border-radius: var(--axf-radius-sm);
+}
+
+/* Only remove the default ring where :focus-visible is supported. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* -------------------------------------------------------------------------
+ * Touch targets — decision K-18 (BINDING)
+ * Minimum hit area 44x44 CSS px; minimum 8px separation.
+ * Applies to buttons, menus, drawer trigger, search controls, pagination,
+ * disclosure, and navigation controls.
+ * ---------------------------------------------------------------------- */
+
+button,
+[role='button'],
+.axf-touch-target,
+.axf-nav-link,
+.axf-pagination a,
+.axf-drawer-trigger,
+summary {
+  min-block-size: var(--axf-touch-target-min);
+  min-inline-size: var(--axf-touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--axf-space-2);
+}
+
+/*
+ * A visual icon may be smaller than the target; the interaction area stays
+ * 44x44. Adjacent targets that cannot be enlarged keep an 8px separation.
+ */
+.axf-touch-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--axf-touch-target-gap);
+}
+
+/* -------------------------------------------------------------------------
+ * Skip link — first element in keyboard order
+ * ---------------------------------------------------------------------- */
+
+.axf-skip-link {
+  position: absolute;
+  inset-inline-start: var(--axf-space-2);
+  inset-block-start: var(--axf-space-2);
+  z-index: var(--axf-z-skip-link);
+  padding: var(--axf-space-3) var(--axf-space-4);
+  background-color: var(--axf-color-surface);
+  border: var(--axf-border-width-thick) solid var(--axf-color-focus);
+  border-radius: var(--axf-radius-md);
+  font-weight: var(--axf-font-weight-medium);
+  /* Visually hidden until focused, but always present for assistive tech. */
+  transform: translateY(-200%);
+  transition: transform var(--axf-duration-fast) var(--axf-easing-standard);
+}
+
+.axf-skip-link:focus {
+  transform: translateY(0);
+}
+
+/* -------------------------------------------------------------------------
+ * Visually hidden utility — content remains available to assistive tech
+ * ---------------------------------------------------------------------- */
+
+.axf-visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* -------------------------------------------------------------------------
+ * Reading column — 07_Workspace_Layout.md
+ * Prose keeps a comfortable measure; supporting blocks may use more width
+ * without widening every paragraph.
+ * ---------------------------------------------------------------------- */
+
+.axf-prose {
+  max-inline-size: var(--axf-measure-reading);
+  font-family: var(--axf-font-family-prose);
+  line-height: var(--axf-line-height-relaxed);
+}
+
+.axf-prose > * + * {
+  margin-block-start: var(--axf-space-4);
+}
+
+.axf-prose h2 {
+  margin-block-start: var(--axf-space-10);
+  font-size: var(--axf-font-size-xl);
+}
+
+.axf-prose h3 {
+  margin-block-start: var(--axf-space-8);
+  font-size: var(--axf-font-size-lg);
+}
+
+.axf-supporting {
+  max-inline-size: var(--axf-measure-supporting);
+}
+
+/* -------------------------------------------------------------------------
+ * Tables — must remain readable; alternative reading at narrow widths
+ * ---------------------------------------------------------------------- */
+
+table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--axf-font-size-sm);
+}
+
+th,
+td {
+  padding: var(--axf-space-2) var(--axf-space-3);
+  border-block-end: var(--axf-border-width) solid var(--axf-color-border);
+  text-align: start;
+  vertical-align: top;
+}
+
+th {
+  font-weight: var(--axf-font-weight-semibold);
+}
+
+.axf-table-scroll {
+  overflow-x: auto;
+  /* Keep the scroll region reachable by keyboard. */
+  scrollbar-gutter: stable;
+}
+
+.axf-table-scroll:focus-visible {
+  outline: var(--axf-focus-ring-width) solid var(--axf-color-focus);
+}

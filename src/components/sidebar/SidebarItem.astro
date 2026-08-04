@@ -1,0 +1,30 @@
+---
+import SidebarIcon, { type IconName } from './SidebarIcon.astro';
+
+interface Props {
+  label: string;
+  href?: string;
+  icon: IconName;
+  active?: boolean;
+  state?: string;
+  class?: string;
+  type?: 'button';
+  dataThemeToggle?: boolean;
+}
+
+const { label, href, icon, active = false, state, class: className, type, dataThemeToggle = false } = Astro.props;
+---
+
+{
+  href ? (
+    <a class:list={['axf-sidebar-item', className]} href={href} aria-current={active ? 'page' : undefined} title={label}>
+      <span class="axf-sidebar-icon-box"><SidebarIcon name={icon} /></span>
+      <span class="axf-sidebar-item-content"><span class="axf-sidebar-item-label">{label}</span>{state && <small>{state}</small>}</span>
+    </a>
+  ) : (
+    <button class:list={['axf-sidebar-item', className]} type={type ?? 'button'} data-theme-toggle={dataThemeToggle ? '' : undefined} title={label}>
+      <span class="axf-sidebar-icon-box"><SidebarIcon name={icon} /></span>
+      <span class="axf-sidebar-item-content"><span class="axf-sidebar-item-label">{label}</span>{state && <small data-theme-label={dataThemeToggle ? '' : undefined}>{state}</small>}</span>
+    </button>
+  )
+}

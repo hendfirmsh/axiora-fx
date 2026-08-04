@@ -1,0 +1,114 @@
+---
+/**
+ * Workspace layout — the persistent application shell.
+ *
+ * Authority: 04_Workspace_Architecture/02_Application_Shell.md,
+ *            04_Workspace_Architecture/07_Workspace_Layout.md,
+ *            04_Workspace_Architecture/13_Accessibility_Workspace.md
+ *
+ * Landmark structure: one banner, one navigation, one main, one contentinfo.
+ * Keyboard order follows source order: skip link -> shell navigation ->
+ * header/search -> breadcrumb -> main content -> footer.
+ *
+ * Language is Indonesian (decision K-05). No language switcher in MVP.
+ */
+
+import '../styles/base.css';
+import '../styles/shell.css';
+import '../styles/components.css';
+
+import Sidebar from '../components/Sidebar.astro';
+import WorkspaceHeader from '../components/WorkspaceHeader.astro';
+import Footer from '../components/Footer.astro';
+import Breadcrumb, { type Crumb } from '../components/Breadcrumb.astro';
+import { ROUTES } from '../lib/routes';
+import { canonical, asset } from '../lib/url';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Breadcrumb ancestry; omit on the workspace home. */
+  breadcrumbs?: Crumb[];
+  /** Set false for routes that must not be indexed (e.g. 404). */
+  indexable?: boolean;
+}
+
+const { title, description, breadcrumbs = [], indexable = true } = Astro.props;
+
+const currentPath = Astro.url.pathname;
+const canonicalUrl = canonical(currentPath, Astro.site);
+const pageTitle = title === ROUTES.home.title ? title : `${title} — AXIORA`;
+const isApplicationRoute = currentPath === ROUTES.console.path || currentPath === ROUTES.settings.path;
+---
+
+<!doctype html>
+<html lang="id" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" href={asset('/favicon.svg')} type="image/svg+xml" />
+    <meta name="theme-color" content="#0d0e0c" />
+
+    {!indexable && <meta name="robots" content="noindex, follow" />}
+
+    {/* No analytics, tracking script, session replay, or ad pixel (K-04). */}
+    {/* No web font is loaded; a system font stack is used (interim identity policy). */}
+
+    {/*
+      APPROVED ENHANCEMENT SCRIPTS (Technical_Foundation_Decision_Note.md:38)
+
+      Only global shell scripts `drawer` and `sidebar-group` are wired here. The
+      Console owns a route-scoped Firebase Auth bundle. The search enhancement,
+      `search-filter`, is NOT included: /search/ is still a PendingRoutePage with
+      no result markup, so the script would have nothing to filter. It ships with
+      Group 10, alongside the results it operates on.
+
+      `is:inline` is REQUIRED, not stylistic. Without it Astro bundles these to a
+      hashed name such as _astro/hoisted.CxYz.js, which matches no entry in
+      APPROVED_SCRIPTS and fails verify-static.mjs check 8. Inline + static file
+      in public/ keeps the emitted filename auditable.
+
+      asset() and NOT url(): url() appends a trailing slash because
+      trailingSlash is 'always' and routes are directory-style. A script is a
+      FILE, so url() produced src="/axiora-fx/scripts/drawer.js/", which 404s
+      at the preview base. Verified by HTTP request against the built output.
+
+      `defer` keeps parsing uninterrupted and guarantees the DOM exists on
+      execution. Both scripts are pure enhancement: with JS unavailable the
+      drawer stays open and every navigation link remains reachable
+      (11_Interaction_Specification.md:57).
+    */}
+    <script is:inline src={asset('/scripts/theme.js')}></script>
+    <script is:inline defer src={asset('/scripts/drawer.js')}></script>
+    <script is:inline defer src={asset('/scripts/sidebar-group.js')}></script>
+    <script is:inline defer src={asset('/scripts/account-menu.js')}></script>
+  </head>
+
+  <body>
+    <div class="axf-shell">
+      <a class="axf-skip-link" href="#axf-main">Lompat ke konten utama</a>
+
+      <WorkspaceHeader title={title} drawerId="axf-drawer" />
+
+      <div class="axf-body">
+        <aside class="axf-sidebar" id="axf-sidebar">
+          <details class="axf-drawer" id="axf-drawer" open>
+            <summary class="axf-drawer-trigger">Buka navigasi Console</summary>
+            <Sidebar currentPath={currentPath} />
+          </details>
+        </aside>
+
+        <main class="axf-main" id="axf-main">
+          <Breadcrumb items={breadcrumbs} />
+          <slot />
+        </main>
+      </div>
+
+      {!isApplicationRoute && <Footer />}
+    </div>
+  </body>
+</html>

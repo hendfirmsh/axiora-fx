@@ -1,0 +1,46 @@
+---
+/**
+ * Footer — closure and trust boundary.
+ *
+ * Authority: 04_Workspace_Architecture/02_Application_Shell.md:45
+ *
+ * Links to Methodology, Corrections, Legal & Risk, and About. Contains no
+ * urgent conversion prompt, trading CTA, or unsupported claim.
+ */
+
+import { FOOTER_LINKS } from '../lib/routes';
+import { url } from '../lib/url';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="axf-footer">
+  <div class="axf-footer-inner">
+    <div class="axf-footer-brand">
+      <strong>AXIORA</strong>
+      <span>Financial intelligence, with evidence attached.</span>
+    </div>
+    <nav aria-label="Tautan kepercayaan">
+      <ul class="axf-footer-links">
+        {
+          FOOTER_LINKS.map((link) => (
+            <li>
+              <a class="axf-nav-link" href={url(link.path)}>
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <p class="axf-footer-note">
+      AXIORA menyediakan bukti, konteks, mekanisme, dan ketidakpastian untuk
+      membantu pemahaman. AXIORA tidak memberikan sinyal, rekomendasi transaksi,
+      nasihat yang dipersonalisasi, atau jaminan hasil. Keputusan tetap menjadi
+      milik Anda.
+    </p>
+
+    <p class="axf-footer-note axf-footer-meta">&copy; {year} AXIORA <span>Indonesia / ID</span></p>
+  </div>
+</footer>

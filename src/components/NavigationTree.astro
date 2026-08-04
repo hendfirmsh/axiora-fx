@@ -1,0 +1,123 @@
+---
+/**
+ * NavigationTree — hierarchy that survives scale.
+ *
+ * Authority: 04_Knowledge_Navigation.md (sidebar structure, scaling model,
+ *            navigation states at :60-67),
+ *            10_Component_Inventory.md (Navigation Tree, Sidebar Group, Sidebar Item),
+ *            11_Interaction_Specification.md:12 (expand group without changing page),
+ *            decision K-18 (touch targets).
+ *
+ * Component_Inventory requires keyboard and touch traversal "without requiring a
+ * deep list", with expanded/collapsed/overflow states. Knowledge_Navigation.md:47
+ * is explicit that the permanent shell must not list every article — depth is
+ * carried by topic and alphabetical indexes, not by an endless tree.
+ *
+ * IMPLEMENTATION CHOICE: <details>/<summary> per group.
+ *
+ * This is the only expand/collapse primitive that is fully operable with
+ * scripting disabled, which the static-first interaction rule requires
+ * (11_Interaction_Specification.md:57). Keyboard support, ARIA expanded state,
+ * and touch activation are supplied by the browser rather than reimplemented, so
+ * there is no custom key handling to get wrong.
+ *
+ * A group containing the current route is forced open, satisfying
+ * Knowledge_Navigation.md:63: a group is "expanded because the user selected it
+ * or the current path requires it". Because the open attribute is computed per
+ * page at build time, the current group is open on first paint with no script and
+ * no layout shift.
+ *
+ * ITEM STATES (Component_Inventory, Sidebar Item: default, active, visited, unavailable)
+ *
+ * An item whose content is not yet approved is still a LINK, not a disabled
+ * element. The route exists and explains itself, so removing the link or setting
+ * aria-disabled would either hide approved architecture or advertise a control
+ * that does nothing. The state is announced in text instead, which is also what
+ * keeps colour from being the only carrier of meaning.
+ *
+ * GROUP LANDING PAGES (04_Knowledge_Navigation.md:34)
+ *
+ * "A group may contain a curated landing page." When a group declares `path`,
+ * that landing page is rendered as the first item in the group so it is
+ * reachable from the shell. Without this, a group landing route that is a
+ * required MVP route (for example /topics/) would exist and be linked only from
+ * recovery blocks, which is not shell navigation.
+ *
+ * The <summary> is deliberately NOT the link. A <summary> that also navigates
+ * has two conflicting activation meanings for one control (expand vs. leave the
+ * page), which is a known keyboard and screen-reader trap. The group toggles;
+ * the landing page is an ordinary item inside it.
+ */
+
+import { NAVIGATION } from '../lib/routes.ts';
+import { readinessOf } from '../lib/route-readiness.ts';
+import { url, isActive } from '../lib/url.ts';
+import SidebarSection from './sidebar/SidebarSection.astro';
+import SidebarItem from './sidebar/SidebarItem.astro';
+import SidebarGroup from './sidebar/SidebarGroup.astro';
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props;
+
+interface ResolvedItem {
+  label: string;
+  path: string;
+  icon: (typeof NAVIGATION)[number]['items'][number]['icon'];
+  exact?: boolean;
+  secondary?: boolean;
+}
+
+/**
+ * Items actually rendered for a group: its curated landing page (if declared and
+ * not already listed) followed by its declared items.
+ *
+ * De-duplication matters because Market Intelligence and Education already carry
+ * a self-referencing item; adding the group path blindly would render the same
+ * route twice and produce two aria-current="page" links in one group.
+ */
+function itemsFor(group: (typeof NAVIGATION)[number]): ResolvedItem[] {
+  const declared = group.items as ResolvedItem[];
+  if (!group.path) return declared;
+  if (declared.some((item) => item.path === group.path)) return declared;
+  return [{ label: `${group.label}: Indeks`, path: group.path, icon: 'book', exact: true }, ...declared];
+}
+
+/** A group is open when it holds the current route, or when it is a flat group. */
+function groupHoldsCurrent(items: ResolvedItem[]): boolean {
+  return items.some((item) => isActive(currentPath, item.path, item.exact));
+}
+---
+
+<nav class="axf-sidebar-navigation axf-drawer-content" aria-label="Navigasi pengetahuan">
+  {
+    NAVIGATION.map((group) => {
+      const items = itemsFor(group);
+      const isOpen = groupHoldsCurrent(items);
+
+      const primaryItems = items.filter((item) => !item.secondary);
+      const secondaryItems = items.filter((item) => item.secondary);
+
+      const renderItem = (item: ResolvedItem) => {
+              const active = isActive(currentPath, item.path, item.exact);
+              const readiness = readinessOf(item.path);
+              const unavailable = readiness.state === 'unavailable';
+
+              return <SidebarItem label={item.label} href={url(item.path)} icon={item.icon} active={active} state={unavailable ? 'Belum tersedia' : undefined} />;
+      };
+
+      return (
+        <SidebarSection label={group.label}>
+          {primaryItems.map(renderItem)}
+          {secondaryItems.length > 0 && (
+            <SidebarGroup label="More markets" open={isOpen && secondaryItems.some((item) => isActive(currentPath, item.path, item.exact))}>
+              {secondaryItems.map(renderItem)}
+            </SidebarGroup>
+          )}
+        </SidebarSection>
+      );
+    })
+  }
+</nav>

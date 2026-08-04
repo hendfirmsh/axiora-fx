@@ -1,0 +1,19 @@
+---
+/**
+ * Topics index.
+ *
+ * Authority: 06_Page_Inventory.md:15, 04_Knowledge_Navigation.md, decision K-16.
+ *
+ * The six browsable topics are fixed (K-16). Group 4 replaces this page.
+ */
+
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES } from '../../lib/routes.ts';
+---
+
+<PendingRoutePage
+  path={ROUTES.topics.path}
+  title={ROUTES.topics.title}
+  description={ROUTES.topics.description}
+  breadcrumbs={[{ label: 'AXIORA', path: ROUTES.home.path }, { label: ROUTES.topics.title }]}
+/>

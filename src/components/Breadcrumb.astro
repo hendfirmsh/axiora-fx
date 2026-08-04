@@ -1,0 +1,46 @@
+---
+/**
+ * Breadcrumb — route ancestry.
+ *
+ * Authority: 04_Workspace_Architecture/02_Application_Shell.md:37,
+ *            10_Component_Inventory.md (Breadcrumb)
+ *
+ * Every segment except the current page is a link. On narrow screens labels
+ * may wrap, but the full path stays available to assistive technology and the
+ * current title stays clear.
+ */
+
+import { url } from '../lib/url';
+
+export interface Crumb {
+  label: string;
+  path?: string;
+}
+
+interface Props {
+  items: Crumb[];
+}
+
+const { items } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <nav class="axf-breadcrumb" aria-label="Remah jejak">
+      <ol>
+        {items.map((item, index) => {
+          const isLast = index === items.length - 1;
+          return (
+            <li>
+              {item.path && !isLast ? (
+                <a href={url(item.path)}>{item.label}</a>
+              ) : (
+                <span aria-current={isLast ? 'page' : undefined}>{item.label}</span>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  )
+}

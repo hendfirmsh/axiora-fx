@@ -1,0 +1,47 @@
+---
+/**
+ * EmptyState — an honest statement that no approved publication exists yet.
+ *
+ * Authority: 04_Workspace_Architecture/04_Knowledge_Navigation.md:66,
+ *            06_Page_Inventory.md (loading/empty/error column for every index)
+ *
+ * Knowledge_Navigation.md:66: "a valid category states that no approved
+ * publication exists yet; it is not filled with filler."
+ *
+ * This component therefore never fabricates placeholder entries, sample content,
+ * or a "coming soon" promise with a date. It states the current status and offers
+ * real navigation that exists now.
+ */
+
+import { url } from '../lib/url.ts';
+
+interface Props {
+  /** What is empty, in the reader's terms. */
+  title: string;
+  /** Why it is empty. Honest status, not an apology or a promise. */
+  explanation: string;
+  /** Routes that do exist, so the reader is never stranded. */
+  alternatives?: Array<{ label: string; path: string }>;
+}
+
+const { title, explanation, alternatives = [] } = Astro.props;
+---
+
+<div class="axf-empty-state">
+  <h2 class="axf-empty-state-title">{title}</h2>
+  <p class="axf-empty-state-body">{explanation}</p>
+
+  {
+    alternatives.length > 0 && (
+      <nav aria-label="Jalur lain yang tersedia">
+        <ul class="axf-empty-state-links">
+          {alternatives.map((alternative) => (
+            <li>
+              <a href={url(alternative.path)}>{alternative.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )
+  }
+</div>

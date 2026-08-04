@@ -1,0 +1,35 @@
+---
+canonicalId: fixture-broken-relationship
+publicationState: test-fixture
+contentType: market-brief
+navigationCategory: market-intelligence
+title: Fixture - relasi menunjuk record yang tidak ada
+summary: >-
+  Record ini valid secara struktur tetapi relasinya menunjuk canonical ID yang
+  tidak pernah ada, sehingga harus ditolak oleh integrity check 2.
+status: published
+language: id
+owner: AXIORA Test Harness
+nextReviewTrigger: Tidak berlaku - fixture
+version: 1.0.0
+publicationDate: 2026-08-03
+disclosure: Fixture uji, bukan konten editorial.
+briefAnswer: Fixture uji.
+indonesiaRelevance: Fixture uji.
+uncertainty: Fixture uji.
+claimClasses:
+  - verified-fact
+topics:
+  - gold
+sources:
+  - title: Fixture
+    publisher: Fixture
+relationships:
+  - type: learn-next
+    target: konsep-yang-tidak-pernah-ada
+    rationale: Target sengaja tidak ada.
+---
+
+Membuktikan penolakan relasi rusak (check 2). `learn-next` adalah relasi internal,
+sehingga targetnya wajib resolve ke record nyata. Janji "pelajari berikutnya" yang
+menunjuk ke ketiadaan adalah janji yang tidak dapat dipenuhi.

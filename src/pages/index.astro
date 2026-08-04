@@ -1,0 +1,206 @@
+---
+import WorkspaceLayout from '../layouts/WorkspaceLayout.astro';
+import { ROUTES, TOPIC_LABELS, topicPath } from '../lib/routes';
+import { TOPICS } from '../lib/taxonomy';
+import { url } from '../lib/url';
+import { INTELLIGENCE_CARDS, MACRO_CALENDAR, MARKET_SNAPSHOTS } from '../data/home';
+
+const topicDescriptions: Record<(typeof TOPICS)[number], string> = {
+  macro: 'Kebijakan, likuiditas, dan siklus global.',
+  gold: 'Yield riil, risiko, dan permintaan aset lindung.',
+  usd: 'Dolar global dan transmisi ke rupiah.',
+  oil: 'Pasokan, geopolitik, dan tekanan harga energi.',
+  inflation: 'Komposisi harga dan implikasi kebijakan.',
+  economy: 'Pertumbuhan, tenaga kerja, dan konsumsi.',
+};
+---
+
+<WorkspaceLayout title={ROUTES.home.title} description={ROUTES.home.description}>
+  <div class="axf-home">
+    <section class="axf-hero" aria-labelledby="home-title">
+      <div class="axf-hero-copy">
+        <p class="axf-kicker"><span>AXIORA / DESK 01</span> Financial intelligence workspace</p>
+        <h1 id="home-title">Jernih membaca pasar.<br /><em>Tenang mengambil keputusan.</em></h1>
+        <p class="axf-hero-lead">
+          Bukti, konteks, dan mekanisme pasar untuk profesional Indonesia yang ingin
+          memahami apa yang berubah, mengapa itu penting, dan apa yang masih belum pasti.
+        </p>
+        <div class="axf-hero-actions">
+          <a class="axf-button axf-button-primary" href={url(ROUTES.todaysBrief.path)}>Baca brief hari ini</a>
+          <a class="axf-button" href={url(ROUTES.methodology.path)}>Lihat metodologi</a>
+        </div>
+      </div>
+      <aside class="axf-desk-note" aria-label="Status edisi">
+        <span class="axf-desk-note-index">01</span>
+        <div>
+          <strong>Edisi pengembangan</strong>
+          <p>Seluruh angka pasar di halaman ini adalah data dummy untuk keperluan preview desain.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="axf-market-strip" aria-labelledby="market-title">
+      <div class="axf-section-heading axf-market-heading">
+        <div>
+          <p class="axf-overline">MARKET PULSE</p>
+          <h2 id="market-title">Snapshot simulasi</h2>
+        </div>
+        <span class="axf-simulation-label">Bukan data real-time</span>
+      </div>
+      <div class="axf-market-grid">
+        {MARKET_SNAPSHOTS.map((item) => (
+          <article class="axf-market-item">
+            <div><span>{item.symbol}</span><small>{item.label}</small></div>
+            <strong>{item.value}</strong>
+            <span class:list={['axf-market-change', `is-${item.direction}`]}>{item.change}</span>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="axf-feature" aria-labelledby="feature-title">
+      <div class="axf-feature-meta">
+        <p class="axf-overline">FEATURED INTELLIGENCE</p>
+        <span>Brief 004 / Simulasi</span>
+      </div>
+      <div class="axf-feature-layout">
+        <div class="axf-feature-main">
+          <p class="axf-feature-label">RUPIAH / MACRO / GLOBAL LIQUIDITY</p>
+          <h2 id="feature-title">Dolar bertahan kuat. Cerita rupiah tidak berhenti di sana.</h2>
+          <p>
+            Pergerakan mata uang merupakan hasil beberapa lapisan: kekuatan dolar global,
+            selisih yield, arus modal, permintaan korporasi, dan kredibilitas kebijakan domestik.
+            Brief ini memetakan mekanismenya tanpa mengubahnya menjadi sinyal transaksi.
+          </p>
+          <a class="axf-text-link" href={url(ROUTES.marketIntelligence.path)}>Buka intelligence brief <span aria-hidden="true">-&gt;</span></a>
+        </div>
+        <dl class="axf-feature-facts">
+          <div><dt>Horizon</dt><dd>1-4 minggu</dd></div>
+          <div><dt>Confidence</dt><dd>Moderat</dd></div>
+          <div><dt>Sumber</dt><dd>5 referensi</dd></div>
+          <div><dt>Terakhir ditinjau</dt><dd>04 Agu 2026</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="axf-content-section" aria-labelledby="latest-title">
+      <div class="axf-section-heading">
+        <div><p class="axf-overline">LATEST INTELLIGENCE</p><h2 id="latest-title">Mulai dari konteks, bukan kebisingan</h2></div>
+        <a href={url(ROUTES.marketIntelligence.path)}>Lihat semua brief</a>
+      </div>
+      <div class="axf-card-grid">
+        {INTELLIGENCE_CARDS.map((card, index) => (
+          <article class="axf-intelligence-card">
+            <span class="axf-card-index">0{index + 1}</span>
+            <p class="axf-overline">{card.eyebrow}</p>
+            <h3><a href={url(card.href)}>{card.title}</a></h3>
+            <p>{card.summary}</p>
+            <small>{card.meta} / Data simulasi</small>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="axf-content-section" aria-labelledby="topics-title">
+      <div class="axf-section-heading">
+        <div><p class="axf-overline">KNOWLEDGE MAP</p><h2 id="topics-title">Enam jalur untuk membaca pasar</h2></div>
+      </div>
+      <div class="axf-topic-grid">
+        {TOPICS.map((topic, index) => (
+          <a class="axf-topic-card" href={url(topicPath(topic))}>
+            <span>0{index + 1}</span>
+            <div><h3>{TOPIC_LABELS[topic]}</h3><p>{topicDescriptions[topic]}</p></div>
+            <strong aria-hidden="true">+</strong>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="axf-content-section axf-calendar" aria-labelledby="calendar-title">
+      <div class="axf-section-heading">
+        <div><p class="axf-overline">MACRO CALENDAR</p><h2 id="calendar-title">Yang perlu dipantau hari ini</h2></div>
+        <span class="axf-simulation-label">Contoh agenda</span>
+      </div>
+      <div class="axf-table-scroll" tabindex="0" aria-label="Kalender makro simulasi">
+        <table>
+          <thead><tr><th>Waktu</th><th>Region</th><th>Peristiwa</th><th>Relevansi</th></tr></thead>
+          <tbody>
+            {MACRO_CALENDAR.map((item) => (
+              <tr><td>{item.time}</td><td><span class="axf-region">{item.region}</span></td><td>{item.event}</td><td>{item.importance}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="axf-method-note" aria-labelledby="method-title">
+      <p class="axf-overline">OUR STANDARD</p>
+      <h2 id="method-title">Tidak ada insight tanpa jejak bukti.</h2>
+      <p>Setiap publikasi AXIORA dirancang untuk membedakan fakta, pandangan sumber, interpretasi, skenario, dan hal yang belum diketahui.</p>
+      <a class="axf-button" href={url(ROUTES.methodology.path)}>Pelajari standar editorial</a>
+    </section>
+  </div>
+</WorkspaceLayout>
+
+<style>
+  .axf-home { max-inline-size: 88rem; }
+  .axf-hero { min-block-size: 34rem; display: grid; align-items: end; gap: var(--axf-space-10); padding-block: var(--axf-space-10) var(--axf-space-16); border-bottom: var(--axf-border-width) solid var(--axf-color-border); }
+  .axf-hero-copy { max-inline-size: 66rem; }
+  .axf-kicker, .axf-overline { color: var(--axf-color-text-tertiary); font-family: var(--axf-font-family-mono); font-size: var(--axf-font-size-xs); letter-spacing: .1em; text-transform: uppercase; }
+  .axf-kicker span { color: var(--axf-color-accent); }
+  .axf-hero h1 { margin-block-start: var(--axf-space-6); font-size: var(--axf-font-size-4xl); letter-spacing: -.055em; line-height: .94; }
+  .axf-hero h1 em { color: var(--axf-color-text-tertiary); font-family: var(--axf-font-family-reading); font-weight: var(--axf-font-weight-regular); }
+  .axf-hero-lead { max-inline-size: 48rem; margin-block-start: var(--axf-space-8); color: var(--axf-color-text-secondary); font-size: var(--axf-font-size-lg); }
+  .axf-hero-actions { display: flex; flex-wrap: wrap; gap: var(--axf-space-3); margin-block-start: var(--axf-space-8); }
+  .axf-button { min-block-size: var(--axf-touch-target-min); display: inline-flex; align-items: center; padding-inline: var(--axf-space-5); color: var(--axf-color-text-primary); border: var(--axf-border-width) solid var(--axf-color-border-strong); border-radius: var(--axf-radius-md); text-decoration: none; font-size: var(--axf-font-size-sm); }
+  .axf-button-primary { color: var(--axf-color-text-inverse); background: var(--axf-color-accent); border-color: var(--axf-color-accent); font-weight: var(--axf-font-weight-semibold); }
+  .axf-desk-note { display: grid; grid-template-columns: auto 1fr; gap: var(--axf-space-4); max-inline-size: 25rem; padding: var(--axf-space-5); background: var(--axf-color-surface-subtle); border: var(--axf-border-width) solid var(--axf-color-border); border-radius: var(--axf-radius-lg); }
+  .axf-desk-note-index { color: var(--axf-color-accent); font-family: var(--axf-font-family-mono); font-size: var(--axf-font-size-xl); }
+  .axf-desk-note p { margin-block-start: var(--axf-space-2); color: var(--axf-color-text-tertiary); font-size: var(--axf-font-size-sm); }
+  .axf-market-strip, .axf-content-section { padding-block: var(--axf-space-12); border-bottom: var(--axf-border-width) solid var(--axf-color-border); }
+  .axf-section-heading { display: flex; justify-content: space-between; align-items: end; gap: var(--axf-space-4); margin-block-end: var(--axf-space-8); }
+  .axf-section-heading h2 { margin-block-start: var(--axf-space-2); font-size: var(--axf-font-size-2xl); }
+  .axf-section-heading > a { font-size: var(--axf-font-size-sm); }
+  .axf-simulation-label { padding: var(--axf-space-1) var(--axf-space-2); color: var(--axf-color-accent); border: var(--axf-border-width) solid var(--axf-color-accent-muted); border-radius: var(--axf-radius-sm); font-family: var(--axf-font-family-mono); font-size: var(--axf-font-size-xs); }
+  .axf-market-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: var(--axf-border-width) solid var(--axf-color-border); border-radius: var(--axf-radius-lg); overflow: hidden; }
+  .axf-market-item { display: grid; grid-template-columns: 1fr auto; gap: var(--axf-space-2); padding: var(--axf-space-5); background: var(--axf-color-surface-subtle); border: var(--axf-border-width) solid var(--axf-color-border); }
+  .axf-market-item div { display: flex; flex-direction: column; }
+  .axf-market-item div span, .axf-market-item strong { font-family: var(--axf-font-family-mono); }
+  .axf-market-item small { color: var(--axf-color-text-tertiary); }
+  .axf-market-change { grid-column: 2; font-family: var(--axf-font-family-mono); font-size: var(--axf-font-size-sm); }
+  .axf-market-change.is-up { color: var(--axf-color-positive); } .axf-market-change.is-down { color: var(--axf-color-negative); } .axf-market-change.is-flat { color: var(--axf-color-text-tertiary); }
+  .axf-feature { margin-block: var(--axf-space-12); padding: var(--axf-space-8); background: var(--axf-color-surface-subtle); border: var(--axf-border-width) solid var(--axf-color-border); border-radius: var(--axf-radius-xl); }
+  .axf-feature-meta { display: flex; justify-content: space-between; gap: var(--axf-space-4); padding-bottom: var(--axf-space-5); border-bottom: var(--axf-border-width) solid var(--axf-color-border); color: var(--axf-color-text-tertiary); font-family: var(--axf-font-family-mono); font-size: var(--axf-font-size-xs); }
+  .axf-feature-layout { display: grid; gap: var(--axf-space-10); padding-top: var(--axf-space-8); }
+  .axf-feature-label { color: var(--axf-color-accent); font-family: var(--axf-font-family-mono); font-size: var(--axf-font-size-xs); letter-spacing: .08em; }
+  .axf-feature-main h2 { max-inline-size: 18ch; margin-block-start: var(--axf-space-4); font-size: var(--axf-font-size-3xl); }
+  .axf-feature-main > p:not(.axf-feature-label) { max-inline-size: 60ch; margin-block-start: var(--axf-space-5); color: var(--axf-color-text-secondary); }
+  .axf-text-link { display: inline-flex; gap: var(--axf-space-2); margin-block-start: var(--axf-space-6); font-weight: var(--axf-font-weight-semibold); }
+  .axf-feature-facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--axf-space-5); }
+  .axf-feature-facts div { padding-top: var(--axf-space-3); border-top: var(--axf-border-width) solid var(--axf-color-border); }
+  .axf-feature-facts dt { color: var(--axf-color-text-tertiary); font-size: var(--axf-font-size-xs); text-transform: uppercase; }
+  .axf-feature-facts dd { margin: var(--axf-space-2) 0 0; font-family: var(--axf-font-family-mono); }
+  .axf-card-grid { display: grid; gap: var(--axf-space-4); }
+  .axf-intelligence-card { position: relative; min-block-size: 19rem; padding: var(--axf-space-6); background: var(--axf-color-surface-subtle); border: var(--axf-border-width) solid var(--axf-color-border); border-radius: var(--axf-radius-lg); }
+  .axf-card-index { position: absolute; inset-block-start: var(--axf-space-5); inset-inline-end: var(--axf-space-5); color: var(--axf-color-text-tertiary); font-family: var(--axf-font-family-mono); }
+  .axf-intelligence-card h3 { margin-block-start: var(--axf-space-8); font-size: var(--axf-font-size-xl); }
+  .axf-intelligence-card h3 a { color: var(--axf-color-text-primary); text-decoration: none; }
+  .axf-intelligence-card > p:not(.axf-overline) { margin-block-start: var(--axf-space-4); color: var(--axf-color-text-secondary); }
+  .axf-intelligence-card small { position: absolute; inset-inline: var(--axf-space-6); inset-block-end: var(--axf-space-6); color: var(--axf-color-text-tertiary); }
+  .axf-topic-grid { border-top: var(--axf-border-width) solid var(--axf-color-border); }
+  .axf-topic-card { min-block-size: 7rem; display: grid; grid-template-columns: 3rem 1fr auto; align-items: center; gap: var(--axf-space-5); padding: var(--axf-space-5); color: var(--axf-color-text-primary); border-bottom: var(--axf-border-width) solid var(--axf-color-border); text-decoration: none; }
+  .axf-topic-card:hover { background: var(--axf-color-surface-subtle); }
+  .axf-topic-card > span { color: var(--axf-color-accent); font-family: var(--axf-font-family-mono); }
+  .axf-topic-card h3 { font-size: var(--axf-font-size-lg); }
+  .axf-topic-card p { margin-block-start: var(--axf-space-1); color: var(--axf-color-text-tertiary); }
+  .axf-topic-card strong { color: var(--axf-color-text-tertiary); font-size: var(--axf-font-size-xl); }
+  .axf-calendar table { min-inline-size: 42rem; background: var(--axf-color-surface-subtle); border: var(--axf-border-width) solid var(--axf-color-border); }
+  .axf-calendar th { color: var(--axf-color-text-tertiary); font-family: var(--axf-font-family-mono); font-size: var(--axf-font-size-xs); text-transform: uppercase; }
+  .axf-calendar td { padding-block: var(--axf-space-4); }
+  .axf-region { display: inline-block; padding: var(--axf-space-1) var(--axf-space-2); border: var(--axf-border-width) solid var(--axf-color-border-strong); border-radius: var(--axf-radius-sm); font-family: var(--axf-font-family-mono); }
+  .axf-method-note { max-inline-size: 64rem; padding-block: var(--axf-space-20); }
+  .axf-method-note h2 { max-inline-size: 15ch; margin-block-start: var(--axf-space-4); font-family: var(--axf-font-family-reading); font-size: var(--axf-font-size-3xl); font-weight: var(--axf-font-weight-regular); }
+  .axf-method-note > p:not(.axf-overline) { max-inline-size: 55ch; margin-block: var(--axf-space-5) var(--axf-space-8); color: var(--axf-color-text-secondary); font-size: var(--axf-font-size-lg); }
+  @media (min-width: 64em) { .axf-hero { grid-template-columns: minmax(0, 1fr) 24rem; } .axf-market-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .axf-feature-layout { grid-template-columns: minmax(0, 1.7fr) minmax(18rem, .8fr); } .axf-card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .axf-topic-grid { display: grid; grid-template-columns: repeat(2, 1fr); } .axf-topic-card:nth-child(odd) { border-inline-end: var(--axf-border-width) solid var(--axf-color-border); } }
+  @media (max-width: 40em) { .axf-hero { min-block-size: auto; padding-block-start: var(--axf-space-6); } .axf-section-heading { align-items: flex-start; flex-direction: column; } .axf-market-grid { grid-template-columns: 1fr; } .axf-feature { padding: var(--axf-space-5); } .axf-feature-meta { flex-direction: column; } .axf-feature-main h2 { font-size: var(--axf-font-size-2xl); } }
+</style>

@@ -1,0 +1,10 @@
+---
+import { ROUTES } from '../../lib/routes.ts';
+import { url } from '../../lib/url.ts';
+import SidebarIcon from './SidebarIcon.astro';
+---
+<a class="axf-sidebar-search" href={url(ROUTES.search.path)} aria-label="Cari di AXIORA">
+  <span class="axf-sidebar-icon-box"><SidebarIcon name="search" /></span>
+  <span>Cari di AXIORA</span>
+  <kbd aria-hidden="true">Ctrl K</kbd>
+</a>

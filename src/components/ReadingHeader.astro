@@ -1,0 +1,121 @@
+---
+/**
+ * ReadingHeader — establish page identity.
+ *
+ * Authority: 10_Component_Inventory.md (Reading Header: "Title, summary, content
+ *            type, scope, date/status, and breadcrumb"; states published,
+ *            corrected, archived, superseded),
+ *            09_Reading_Flows.md:5 (headline and scope open every reading flow),
+ *            13_Accessibility_Workspace.md:30.
+ *
+ * BREADCRUMB: the inventory lists breadcrumb as part of this component's
+ * responsibility. It is rendered by WorkspaceLayout immediately before this
+ * component rather than inside it, because there must be exactly one breadcrumb
+ * landmark per page and the layout renders it for every route, including routes
+ * that have no reading header (404, readiness states). The responsibility is met
+ * as a region; duplicating the element here would produce two navigation
+ * landmarks with the same label.
+ *
+ * FIELD DISCIPLINE: every prop below maps to an existing Content Model field.
+ * No prop invents a field, and there is deliberately no prop for a "hero image",
+ * "author avatar", "read time", or any other affordance the content model does
+ * not define (Component_Inventory composition rules).
+ *
+ * The non-current states are not a styling variant. A corrected, archived, or
+ * superseded record renders a prose statement, because a badge alone may not
+ * carry that meaning.
+ */
+
+import Badge from './Badge.astro';
+import { CONTENT_TYPE_LABELS, DIFFICULTY_LABELS, STATUS_LABELS, formatDate, machineDate, statusExplanation } from '../lib/labels.ts';
+import { TOPIC_LABELS, topicPath } from '../lib/routes.ts';
+import { isDiscoverable } from '../lib/route-readiness.ts';
+import { url } from '../lib/url.ts';
+import type { ContentType, Difficulty, LifecycleStatus, Topic } from '../lib/taxonomy.ts';
+
+interface Props {
+  title: string;
+  summary: string;
+  contentType: ContentType;
+  status: LifecycleStatus;
+  /** Content Model: topics[]. Rendered as scope, not as a decorative tag cloud. */
+  topics?: Topic[];
+  difficulty?: Difficulty;
+  publicationDate?: Date;
+  lastReviewedDate?: Date;
+}
+
+const {
+  title,
+  summary,
+  contentType,
+  status,
+  topics = [],
+  difficulty,
+  publicationDate,
+  lastReviewedDate,
+} = Astro.props;
+
+const explanation = statusExplanation(status);
+---
+
+<header class="axf-reading-header">
+  <h1 class="axf-reading-title">{title}</h1>
+
+  {/* Summary is a Content Model field, and it is the answer-first opening. */}
+  <p class="axf-reading-summary">{summary}</p>
+
+  <div class="axf-reading-badges axf-touch-group">
+    <Badge kind="content-type" dimension="Jenis" label={CONTENT_TYPE_LABELS[contentType]} />
+    <Badge kind="status" dimension="Status" label={STATUS_LABELS[status]} />
+    {difficulty && (
+      <Badge kind="difficulty" dimension="Tingkat" label={DIFFICULTY_LABELS[difficulty]} />
+    )}
+  </div>
+
+  {/*
+    Required: a non-current status must be explained in prose, not by badge alone
+    (Component_Inventory composition rules).
+  */}
+  {explanation && (
+    <p class="axf-reading-status-note" role="note">{explanation}</p>
+  )}
+
+  <dl class="axf-reading-dates">
+    {publicationDate && (
+      <div class="axf-reading-date">
+        <dt>Dipublikasikan</dt>
+        <dd><time datetime={machineDate(publicationDate)}>{formatDate(publicationDate)}</time></dd>
+      </div>
+    )}
+    {lastReviewedDate && (
+      <div class="axf-reading-date">
+        <dt>Ditinjau terakhir</dt>
+        <dd><time datetime={machineDate(lastReviewedDate)}>{formatDate(lastReviewedDate)}</time></dd>
+      </div>
+    )}
+  </dl>
+
+  {/*
+    Scope. Topics are controlled taxonomy (K-16), so they are links to the topic
+    authority pages, not decoration. A topic whose route is not discoverable is
+    still shown as text: the scope of a record is a fact about the record, and
+    suppressing it would misstate what the page covers.
+  */}
+  {topics.length > 0 && (
+    <nav class="axf-reading-scope" aria-label="Cakupan topik">
+      <h2 class="axf-visually-hidden">Cakupan topik</h2>
+      <ul class="axf-reading-scope-list axf-touch-group">
+        {topics.map((topic) => (
+          <li>
+            {isDiscoverable(topicPath(topic)) ? (
+              <a class="axf-tag" href={url(topicPath(topic))}>{TOPIC_LABELS[topic]}</a>
+            ) : (
+              <span class="axf-tag axf-tag-static">{TOPIC_LABELS[topic]}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )}
+</header>

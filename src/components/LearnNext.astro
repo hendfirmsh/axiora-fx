@@ -1,0 +1,41 @@
+---
+/**
+ * LearnNext — the next editorial step in a knowledge sequence.
+ *
+ * Authority: 10_Component_Inventory.md (Learn Next: "Ordered by editorial
+ *            dependency, not personalization"; states populated, no next step),
+ *            11_Interaction_Specification.md:24,
+ *            09_Reading_Flows.md:18.
+ *
+ * Selects only the forward-sequence relationship types. `prerequisite` is
+ * deliberately excluded: it points BACKWARD to what must be understood first, and
+ * presenting it as a next step would invert the reading order.
+ *
+ * Rendering is delegated to RelatedLinks so target filtering and empty-state
+ * handling cannot diverge between the two continuation blocks.
+ */
+
+import RelatedLinks, { type RelatedLink } from './RelatedLinks.astro';
+
+/** Forward-sequence relationship types only. */
+const LEARN_NEXT_TYPES = ['learn-next', 'deepens', 'applies-concept'] as const;
+
+interface Props {
+  links: RelatedLink[];
+  headingLevel?: 2 | 3;
+}
+
+const { links, headingLevel = 2 } = Astro.props;
+
+const forward = links.filter((link) =>
+  (LEARN_NEXT_TYPES as readonly string[]).includes(link.type),
+);
+---
+
+<RelatedLinks
+  id="learn-next"
+  heading="Pelajari berikutnya"
+  links={forward}
+  headingLevel={headingLevel}
+  emptyStatement="Belum ada langkah lanjutan yang ditetapkan untuk catatan ini. Urutan belajar ditentukan secara editorial, bukan otomatis."
+/>

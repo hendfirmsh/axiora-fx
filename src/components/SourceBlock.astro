@@ -1,0 +1,105 @@
+---
+/**
+ * SourceBlock — make references inspectable.
+ *
+ * Authority: 04_Workspace_Architecture/10_Component_Inventory.md (Source Block),
+ *            06_Page_Inventory.md:12
+ *
+ * "Shows source title, publisher, date/access context, and external link state"
+ * with states available, unavailable, archived.
+ *
+ * Two rules enforced here:
+ *
+ * 1. Composition rule: "A source block cannot be visually subordinated below a
+ *    promotional CTA." This component renders no CTA, and callers place it within
+ *    the article body rather than after any conversion prompt.
+ *
+ * 2. An unavailable or archived source still states its full citation. Provenance
+ *    must survive link rot: a reader can verify a citation independently even when
+ *    the URL no longer resolves, so the citation is never replaced by an error.
+ */
+
+import { formatDate, machineDate } from '../lib/labels.ts';
+
+interface Source {
+  title: string;
+  publisher: string;
+  url?: string;
+  publishedDate?: Date;
+  accessedDate?: Date;
+  state?: 'available' | 'unavailable' | 'archived';
+}
+
+interface Props {
+  sources: Source[];
+  /** Heading level so the block nests correctly in the page outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { sources, headingLevel = 2 } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+
+const STATE_NOTE: Record<string, string> = {
+  unavailable: 'Tautan sumber ini tidak lagi dapat diakses. Kutipan dipertahankan agar tetap dapat diverifikasi secara mandiri.',
+  archived: 'Sumber ini diakses melalui versi arsip.',
+};
+---
+
+<section class="axf-sources" aria-labelledby="axf-sources-heading">
+  <Heading id="axf-sources-heading" class="axf-section-heading">Sumber</Heading>
+
+  {
+    sources.length === 0 ? (
+      <p class="axf-sources-empty">
+        Catatan ini belum mencantumkan sumber. Klaim tanpa sumber tidak memenuhi
+        standar bukti AXIORA dan tidak boleh dipublikasikan.
+      </p>
+    ) : (
+      <ol class="axf-source-list">
+        {sources.map((source) => {
+          const state = source.state ?? 'available';
+          const note = STATE_NOTE[state];
+          return (
+            <li class={`axf-source axf-source-${state}`}>
+              <cite class="axf-source-title">{source.title}</cite>
+              <span class="axf-source-publisher">{source.publisher}</span>
+
+              <span class="axf-source-dates">
+                {source.publishedDate && (
+                  <span>
+                    Diterbitkan{' '}
+                    <time datetime={machineDate(source.publishedDate)}>
+                      {formatDate(source.publishedDate)}
+                    </time>
+                  </span>
+                )}
+                {source.accessedDate && (
+                  <span>
+                    Diakses{' '}
+                    <time datetime={machineDate(source.accessedDate)}>
+                      {formatDate(source.accessedDate)}
+                    </time>
+                  </span>
+                )}
+              </span>
+
+              {/* Link state is stated as text, never by colour alone. */}
+              {source.url && state === 'available' ? (
+                <a class="axf-source-link" href={source.url} rel="noopener nofollow">
+                  Buka sumber
+                  <span class="axf-visually-hidden"> (tautan eksternal)</span>
+                </a>
+              ) : (
+                <span class="axf-source-state">
+                  {state === 'unavailable' ? 'Tautan tidak tersedia' : 'Versi arsip'}
+                </span>
+              )}
+
+              {note && <p class="axf-source-note">{note}</p>}
+            </li>
+          );
+        })}
+      </ol>
+    )
+  }
+</section>

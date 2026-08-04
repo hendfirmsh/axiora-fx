@@ -1,0 +1,19 @@
+---
+/**
+ * Search.
+ *
+ * Authority: 06_Page_Inventory.md:20, 05_Sitemap.md:47.
+ *
+ * Group 10 replaces this page with the static-corpus search implementation.
+ */
+
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES } from '../../lib/routes.ts';
+---
+
+<PendingRoutePage
+  path={ROUTES.search.path}
+  title={ROUTES.search.title}
+  description={ROUTES.search.description}
+  breadcrumbs={[{ label: 'AXIORA', path: ROUTES.home.path }, { label: ROUTES.search.title }]}
+/>

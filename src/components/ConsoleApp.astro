@@ -1,0 +1,106 @@
+<section class="axf-console-app" aria-labelledby="console-title">
+  <div class="axf-console-login" data-auth-state="signed-out">
+    <p class="axf-overline">AXIORA CONSOLE / PRIVATE WORKSPACE</p>
+    <h1 id="console-title">Your intelligence<br /><em>workspace.</em></h1>
+    <p class="axf-console-lead">Kelola workspace, usage, dan API configuration dari satu tempat.</p>
+    <div class="axf-console-actions">
+      <button class="axf-console-button axf-console-google" type="button" data-auth="google">Continue with Google</button>
+      <button class="axf-console-button axf-console-demo" type="button" data-auth="demo">Explore demo workspace</button>
+    </div>
+    <p class="axf-console-status" data-auth-status>Demo mode tersedia. Login Firebase akan aktif setelah provider diaktifkan di Console.</p>
+  </div>
+
+  <div class="axf-console-dashboard" data-auth-state="signed-in" hidden>
+    <div class="axf-console-dashboard-head">
+      <div><p class="axf-overline">OVERVIEW / AUGUST 2026</p><h1>Good morning, <span data-user-name>Hendrik</span>.</h1></div>
+      <button class="axf-console-button axf-console-signout" type="button" data-auth="signout">Sign out</button>
+    </div>
+    <div class="axf-console-metrics">
+      <article><span>Requests this month</span><strong>12,840</strong><small>+18.4% vs last month</small></article>
+      <article><span>Tokens consumed</span><strong>2.48M</strong><small>of 10M included tokens</small></article>
+      <article><span>Active workspaces</span><strong>03</strong><small>All systems operational</small></article>
+    </div>
+    <div class="axf-console-columns">
+      <section class="axf-console-panel"><div class="axf-console-panel-heading"><h2>Recent activity</h2><span>View all</span></div><div class="axf-console-activity"><p><b>Market Brief Agent</b> completed a run <time>2 min ago</time></p><p><b>AXIORA FX</b> workspace was updated <time>1 hour ago</time></p><p><b>API key</b> rotated successfully <time>Yesterday</time></p></div></section>
+      <section class="axf-console-panel"><div class="axf-console-panel-heading"><h2>Quick start</h2></div><div class="axf-console-quick"><a href="#api-keys">Create an API key <span>-&gt;</span></a><a href="#workspaces">Configure a workspace <span>-&gt;</span></a><a href="#docs">Read the API docs <span>-&gt;</span></a></div></section>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+  import { auth, googleProvider } from '../lib/firebase';
+
+  const login = document.querySelector<HTMLElement>('.axf-console-login');
+  const dashboard = document.querySelector<HTMLElement>('.axf-console-dashboard');
+  const status = document.querySelector<HTMLElement>('[data-auth-status]');
+  const name = document.querySelector<HTMLElement>('[data-user-name]');
+  let demoMode = false;
+
+  function showDashboard(user: { displayName?: string | null } | null) {
+    if (!login || !dashboard) return;
+    login.hidden = Boolean(user);
+    dashboard.hidden = !user;
+    if (user?.displayName && name) name.textContent = user.displayName.split(' ')[0];
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) demoMode = false;
+    if (!demoMode) showDashboard(user);
+  });
+
+  document.querySelector('[data-auth="google"]')?.addEventListener('click', async () => {
+    if (!status) return;
+    status.textContent = 'Membuka login Google...';
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      status.textContent = error instanceof Error ? error.message : 'Login belum tersedia. Gunakan demo workspace.';
+    }
+  });
+
+  document.querySelector('[data-auth="demo"]')?.addEventListener('click', () => {
+    demoMode = true;
+    showDashboard({ displayName: 'Hendrik' });
+  });
+  async function leaveWorkspace() {
+    demoMode = false;
+    if (auth.currentUser) await signOut(auth);
+    showDashboard(null);
+  }
+
+  document.querySelector('[data-auth="signout"]')?.addEventListener('click', leaveWorkspace);
+  document.addEventListener('axiora:signout', leaveWorkspace);
+</script>
+
+<style>
+  [hidden] { display: none !important; }
+  .axf-console-app { max-inline-size: 88rem; padding-block: var(--axf-space-8); }
+  .axf-console-login { min-block-size: 70vh; display: flex; flex-direction: column; justify-content: center; max-inline-size: 48rem; }
+  .axf-console-login h1, .axf-console-dashboard h1 { margin-block-start: var(--axf-space-5); font-size: clamp(2.5rem, 7vw, 5.5rem); letter-spacing: -.06em; line-height: .95; }
+  .axf-console-login h1 em { color: var(--axf-color-text-tertiary); font-family: var(--axf-font-family-reading); font-weight: 400; }
+  .axf-console-lead { margin-block-start: var(--axf-space-6); color: var(--axf-color-text-secondary); font-size: var(--axf-font-size-lg); }
+  .axf-console-actions { display: flex; flex-wrap: wrap; gap: var(--axf-space-3); margin-block-start: var(--axf-space-8); }
+  .axf-console-button { min-block-size: var(--axf-touch-target-min); padding-inline: var(--axf-space-5); color: var(--axf-color-text-primary); background: var(--axf-color-surface-subtle); border: var(--axf-border-width) solid var(--axf-color-border-strong); border-radius: var(--axf-radius-md); font: inherit; cursor: pointer; }
+  .axf-console-google { color: var(--axf-color-text-inverse); background: var(--axf-color-accent); border-color: var(--axf-color-accent); }
+  .axf-console-status { margin-block-start: var(--axf-space-5); color: var(--axf-color-text-tertiary); font-size: var(--axf-font-size-sm); }
+  .axf-console-dashboard-head { display: flex; justify-content: space-between; align-items: end; gap: var(--axf-space-4); padding-block: var(--axf-space-6) var(--axf-space-10); border-bottom: var(--axf-border-width) solid var(--axf-color-border); }
+  .axf-console-dashboard h1 { font-size: var(--axf-font-size-3xl); letter-spacing: -.03em; }
+  .axf-console-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--axf-space-4); margin-block: var(--axf-space-8); }
+  .axf-console-metrics article, .axf-console-panel { padding: var(--axf-space-5); background: var(--axf-color-surface-subtle); border: var(--axf-border-width) solid var(--axf-color-border); border-radius: var(--axf-radius-lg); }
+  .axf-console-metrics article { display: flex; flex-direction: column; gap: var(--axf-space-3); }
+  .axf-console-metrics span, .axf-console-metrics small { color: var(--axf-color-text-tertiary); font-size: var(--axf-font-size-sm); }
+  .axf-console-metrics strong { font-family: var(--axf-font-family-mono); font-size: var(--axf-font-size-2xl); }
+  .axf-console-metrics small { color: var(--axf-color-positive); }
+  .axf-console-columns { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--axf-space-4); }
+  .axf-console-panel-heading { display: flex; justify-content: space-between; gap: var(--axf-space-4); padding-bottom: var(--axf-space-4); border-bottom: var(--axf-border-width) solid var(--axf-color-border); }
+  .axf-console-panel-heading h2 { font-size: var(--axf-font-size-lg); }
+  .axf-console-panel-heading span { color: var(--axf-color-accent); font-size: var(--axf-font-size-sm); }
+  .axf-console-activity p, .axf-console-quick a { display: flex; justify-content: space-between; gap: var(--axf-space-4); padding-block: var(--axf-space-4); border-bottom: var(--axf-border-width) solid var(--axf-color-border); font-size: var(--axf-font-size-sm); }
+  .axf-console-activity time { color: var(--axf-color-text-tertiary); white-space: nowrap; }
+  .axf-console-quick { display: flex; flex-direction: column; }
+  .axf-console-quick a { color: var(--axf-color-text-primary); text-decoration: none; }
+  .axf-console-quick a span { color: var(--axf-color-accent); }
+  @media (max-width: 48em) { .axf-console-metrics, .axf-console-columns { grid-template-columns: 1fr; } .axf-console-dashboard-head { align-items: flex-start; flex-direction: column; } }
+  @media (max-width: 32em) { .axf-console-metrics { grid-template-columns: 1fr; } }
+</style>

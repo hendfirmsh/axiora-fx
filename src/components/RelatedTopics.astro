@@ -1,0 +1,50 @@
+---
+/**
+ * RelatedTopics — adjacent context, grouped by typed relationship.
+ *
+ * Authority: 10_Component_Inventory.md (Related Topics: "Uses typed relationships
+ *            and concise rationale"; states populated, empty, unavailable),
+ *            02.8_Content_Architecture/08_Internal_Linking_Strategy.md,
+ *            09_Reading_Flows.md:20.
+ *
+ * Selects the lateral and backward relationship types — context, contrast, and
+ * prerequisites — as distinct from the forward sequence owned by LearnNext.
+ * Grouped by type so the reader sees WHY each set of links is adjacent.
+ *
+ * `updates` and `supersedes` are excluded: those describe lifecycle replacement,
+ * not adjacent context, and belong with the record's status statement where the
+ * reader is told the record is no longer current.
+ */
+
+import RelatedLinks, { type RelatedLink } from './RelatedLinks.astro';
+
+/** Lateral and backward context relationship types. */
+const RELATED_TYPES = [
+  'related-context',
+  'contrasts',
+  'prerequisite',
+  'defines',
+  'explains-event',
+  'evidence-source',
+] as const;
+
+interface Props {
+  links: RelatedLink[];
+  headingLevel?: 2 | 3;
+}
+
+const { links, headingLevel = 2 } = Astro.props;
+
+const lateral = links.filter((link) =>
+  (RELATED_TYPES as readonly string[]).includes(link.type),
+);
+---
+
+<RelatedLinks
+  id="related-topics"
+  heading="Konteks terkait"
+  links={lateral}
+  groupByType={true}
+  headingLevel={headingLevel}
+  emptyStatement="Belum ada konteks terkait yang ditautkan pada catatan ini."
+/>

@@ -1,0 +1,37 @@
+---
+/**
+ * Badge — content state and type, communicated as text.
+ *
+ * Authority: 04_Workspace_Architecture/10_Component_Inventory.md (Badge),
+ *            13_Accessibility_Workspace.md:30
+ *
+ * Two binding rules:
+ *
+ * 1. "Text meaning remains without color" (Component_Inventory, Badge). The label
+ *    is always rendered as words. Colour and border are decoration on top of a
+ *    complete textual statement, never the statement itself.
+ *
+ * 2. "A status badge cannot be the only expression of correction, archival, or
+ *    future state" (Component_Inventory, composition rules). Callers rendering a
+ *    corrected, archived, or superseded record MUST also render the corresponding
+ *    prose block. This component deliberately provides no way to satisfy that
+ *    obligation on its own.
+ */
+
+type BadgeKind = 'status' | 'content-type' | 'difficulty' | 'future';
+
+interface Props {
+  kind: BadgeKind;
+  /** The complete human-readable label. Never an abbreviation or a colour name. */
+  label: string;
+  /** Optional prefix naming the dimension, e.g. "Status". Improves screen-reader clarity. */
+  dimension?: string;
+}
+
+const { kind, label, dimension } = Astro.props;
+---
+
+<span class={`axf-badge axf-badge-${kind}`}>
+  {dimension && <span class="axf-badge-dimension">{dimension}:</span>}
+  <span class="axf-badge-label">{label}</span>
+</span>

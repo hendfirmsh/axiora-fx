@@ -1,0 +1,21 @@
+---
+/**
+ * Education index.
+ *
+ * Authority: 06_Page_Inventory.md:13 ("Required in limited form"),
+ *            05_Sitemap.md:39, Product_Requirements.md:182.
+ *
+ * Explainers are published only as the brief corpus requires them; this is not a
+ * curriculum. Group 3 replaces this page.
+ */
+
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES } from '../../lib/routes.ts';
+---
+
+<PendingRoutePage
+  path={ROUTES.education.path}
+  title={ROUTES.education.title}
+  description={ROUTES.education.description}
+  breadcrumbs={[{ label: 'AXIORA', path: ROUTES.home.path }, { label: ROUTES.education.title }]}
+/>

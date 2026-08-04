@@ -1,0 +1,37 @@
+---
+/**
+ * Topic authority pages — one route per approved topic.
+ *
+ * Authority: 06_Page_Inventory.md:15, decision K-16 (exactly six topics),
+ *            05_Sitemap.md:41.
+ *
+ * getStaticPaths generates from TOPICS, so the route set cannot drift from the
+ * controlled vocabulary. A seventh topic page is not reachable by adding a file;
+ * it would require a taxonomy change, which is a Content Architecture decision.
+ *
+ * Group 4 replaces the body with the topic collection. The routes themselves exist
+ * now so the six sidebar topic links resolve rather than 404.
+ */
+
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES, TOPIC_LABELS, topicPath } from '../../lib/routes.ts';
+import { TOPICS } from '../../lib/taxonomy.ts';
+
+export function getStaticPaths() {
+  return TOPICS.map((topic) => ({ params: { topic } }));
+}
+
+const { topic } = Astro.params as { topic: (typeof TOPICS)[number] };
+const label = TOPIC_LABELS[topic];
+---
+
+<PendingRoutePage
+  path={topicPath(topic)}
+  title={`Topic: ${label}`}
+  description={`Konteks topik ${label} di AXIORA: definisi, cakupan, brief terkait, dan konsep pendukung.`}
+  breadcrumbs={[
+    { label: 'AXIORA', path: ROUTES.home.path },
+    { label: ROUTES.topics.title, path: ROUTES.topics.path },
+    { label },
+  ]}
+/>

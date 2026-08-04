@@ -1,0 +1,346 @@
+/*
+ * AXIORA application shell.
+ *
+ * Authority: 04_Workspace_Architecture/02_Application_Shell.md,
+ *            04_Workspace_Architecture/07_Workspace_Layout.md,
+ *            04_Workspace_Architecture/12_Responsive_Workspace.md
+ *
+ * Mobile-first. The shell adapts without changing meaning: orientation,
+ * evidence, sources, corrections, and the next learning path survive at every
+ * width. Content source order is never rearranged by layout.
+ */
+
+/* -------------------------------------------------------------------------
+ * Shell frame
+ * ---------------------------------------------------------------------- */
+
+.axf-shell {
+  min-block-size: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--axf-color-surface) 96%, transparent);
+}
+
+/* -------------------------------------------------------------------------
+ * Header — sticky orientation; never obscures source or correction content
+ * ---------------------------------------------------------------------- */
+
+.axf-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--axf-z-header);
+  display: flex;
+  align-items: center;
+  gap: var(--axf-space-3);
+  min-block-size: var(--axf-header-height);
+  padding-inline: var(--axf-space-4);
+  background-color: color-mix(in srgb, var(--axf-header-bg) 88%, transparent);
+  border-block-end: var(--axf-border-width) solid var(--axf-header-border);
+  backdrop-filter: blur(16px);
+}
+
+/* Wordmark is accessible TEXT only. No symbol, no logo, no brand colour. */
+.axf-wordmark {
+  font-size: var(--axf-font-size-md);
+  font-weight: var(--axf-font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: var(--axf-color-text-primary);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--axf-space-2);
+  letter-spacing: 0.12em;
+}
+
+.axf-wordmark-mark {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  color: var(--axf-color-text-inverse);
+  background: var(--axf-color-accent);
+  border-radius: var(--axf-radius-sm);
+  font-family: var(--axf-font-family-mono);
+  font-size: var(--axf-font-size-sm);
+  letter-spacing: 0;
+}
+
+.axf-header-context {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  font-size: var(--axf-font-size-sm);
+  color: var(--axf-color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.axf-drawer-trigger {
+  justify-content: center;
+  padding-inline: var(--axf-space-3);
+  background-color: transparent;
+  border: var(--axf-border-width) solid var(--axf-color-border);
+  border-radius: var(--axf-radius-md);
+  color: inherit;
+  font: inherit;
+  font-size: var(--axf-font-size-sm);
+  cursor: pointer;
+}
+
+/* -------------------------------------------------------------------------
+ * Body: sidebar + main workspace
+ * ---------------------------------------------------------------------- */
+
+.axf-body {
+  flex: 1 1 auto;
+  display: flex;
+  inline-size: 100%;
+  max-inline-size: var(--axf-workspace-max);
+  margin-inline: auto;
+}
+
+/* -------------------------------------------------------------------------
+ * Sidebar — durable knowledge index
+ *
+ * Mobile: a drawer. Without JavaScript it is still reachable, because the
+ * markup uses <details>/<summary>, which works with scripting disabled.
+ * ---------------------------------------------------------------------- */
+
+.axf-sidebar {
+  flex: 0 0 var(--axf-sidebar-width);
+  background-color: color-mix(in srgb, var(--axf-sidebar-bg) 94%, transparent);
+  border-inline-end: var(--axf-border-width) solid var(--axf-sidebar-border);
+  min-inline-size: 0;
+  transition: flex-basis var(--axf-duration-medium) var(--axf-easing-standard), inline-size var(--axf-duration-medium) var(--axf-easing-standard);
+}
+
+.axf-nav-link {
+  inline-size: 100%;
+  padding-inline: var(--axf-space-3);
+  border-radius: var(--axf-radius-md);
+  text-decoration: none;
+  color: var(--axf-color-text-secondary);
+  font-size: var(--axf-font-size-sm);
+  transition:
+    background var(--axf-duration-fast) var(--axf-easing-standard),
+    color var(--axf-duration-fast) var(--axf-easing-standard);
+}
+
+.axf-nav-link:hover {
+  background-color: var(--axf-sidebar-item-active-bg);
+  color: var(--axf-color-text-primary);
+}
+
+/*
+ * Active state. aria-current carries the meaning for assistive technology;
+ * the border provides a non-colour visual cue.
+ */
+.axf-nav-link[aria-current='page'] {
+  background-color: var(--axf-sidebar-item-active-bg);
+  color: var(--axf-color-text-primary);
+  font-weight: var(--axf-font-weight-medium);
+  box-shadow: inset 3px 0 0 0 var(--axf-color-accent);
+}
+
+/* -------------------------------------------------------------------------
+ * Main workspace
+ * ---------------------------------------------------------------------- */
+
+.axf-main {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  padding-inline: var(--axf-space-4);
+  padding-block: var(--axf-space-8) var(--axf-space-16);
+}
+
+/* -------------------------------------------------------------------------
+ * Breadcrumb — route ancestry, not decoration
+ * ---------------------------------------------------------------------- */
+
+.axf-breadcrumb {
+  margin-block-end: var(--axf-space-5);
+  font-size: var(--axf-font-size-sm);
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-breadcrumb ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--axf-space-2);
+}
+
+.axf-breadcrumb li + li::before {
+  content: '/';
+  margin-inline-end: var(--axf-space-2);
+  color: var(--axf-color-text-tertiary);
+}
+
+/* -------------------------------------------------------------------------
+ * Footer — closure and trust boundary
+ * ---------------------------------------------------------------------- */
+
+.axf-footer {
+  background-color: var(--axf-footer-bg);
+  border-block-start: var(--axf-border-width) solid var(--axf-color-border);
+  padding: var(--axf-space-12) var(--axf-space-4);
+  font-size: var(--axf-font-size-sm);
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-footer-inner {
+  inline-size: 100%;
+  max-inline-size: var(--axf-workspace-max);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--axf-space-4);
+}
+
+.axf-footer-brand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--axf-space-3);
+  align-items: baseline;
+}
+
+.axf-footer-brand strong {
+  color: var(--axf-color-text-primary);
+  letter-spacing: 0.12em;
+}
+
+.axf-footer-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--axf-space-4);
+  padding-top: var(--axf-space-4);
+  border-top: var(--axf-border-width) solid var(--axf-color-border);
+}
+
+.axf-footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--axf-touch-target-gap);
+}
+
+.axf-footer-note {
+  max-inline-size: var(--axf-measure-supporting);
+  color: var(--axf-color-text-tertiary);
+}
+
+/* -------------------------------------------------------------------------
+ * RESPONSIVE BANDS — 12_Responsive_Workspace.md
+ * ---------------------------------------------------------------------- */
+
+/* Mobile: header + drawer, single natural column. */
+@media (max-width: 47.99em) {
+  .axf-body {
+    flex-direction: column;
+  }
+
+  .axf-sidebar {
+    flex: none;
+    inline-size: 100%;
+    border-inline-end: none;
+    border-block-end: var(--axf-border-width) solid var(--axf-sidebar-border);
+  }
+
+  /*
+   * The drawer ships OPEN in the markup so navigation is present without
+   * scripting (11_Interaction_Specification.md:57). The approved drawer script
+   * closes it on mobile at load; with scripting disabled it simply stays open
+   * and the reader scrolls past it. Both states are usable.
+   *
+   * This rule styles the CLOSED state, which a reader reaches through the
+   * native <summary> toggle. It is live, not dead: verified in Chrome 150 by
+   * toggling the drawer and observing display:none on .axf-drawer-content.
+   */
+  .axf-drawer:not([open]) .axf-drawer-content {
+    display: none;
+  }
+
+  .axf-drawer-content {
+    padding-block: var(--axf-space-2);
+  }
+}
+
+/* Tablet and up: persistent sidebar, drawer control hidden. */
+@media (min-width: 48em) {
+  /*
+   * BREAKPOINT TRAP — why this is :not(:where(.axf-drawer:not([open])) > *)
+   *
+   * Hiding the trigger unconditionally here created an unrecoverable state:
+   * close the drawer at mobile width, widen past 48em, and the drawer stays
+   * closed while its only control disappears. Navigation became unreachable
+   * with no way to restore it, and the <summary> could not even take focus.
+   *
+   * A closed <details> hides its content through the ::details-content
+   * pseudo-element with content-visibility: hidden, NOT by applying
+   * display: none to descendants. Author CSS therefore CANNOT reveal that
+   * content — verified in Chrome 150: display:block on .axf-drawer-content
+   * leaves checkVisibility() false, hit-testing returns the ancestor, and a
+   * real click times out. So CSS alone cannot rescue a closed drawer, and the
+   * fix must be to keep the control reachable whenever the drawer is closed.
+   *
+   * The trigger is hidden only while the drawer is actually open. The
+   * forbidden state (closed + no control) is now structurally unreachable
+   * rather than merely avoided by script, so it holds even if JS fails.
+   */
+  .axf-drawer[open] > .axf-drawer-trigger {
+    display: none;
+  }
+
+  .axf-main {
+    padding-inline: var(--axf-space-8);
+  }
+
+  .axf-sidebar {
+    position: sticky;
+    inset-block-start: var(--axf-header-height);
+    block-size: calc(100dvh - var(--axf-header-height));
+    overflow: hidden;
+  }
+
+  .axf-drawer {
+    block-size: 100%;
+  }
+
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar {
+    flex-basis: var(--axf-sidebar-collapsed-width);
+    inline-size: var(--axf-sidebar-collapsed-width);
+  }
+
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-toggle {
+    background: var(--axf-color-surface-sunken);
+  }
+}
+
+/* Desktop widens the content gutter; sidebar behaviour starts at tablet width. */
+@media (min-width: 64em) {
+  .axf-main {
+    padding-inline: var(--axf-space-10);
+  }
+}
+
+/*
+ * Ultra-wide: extra space becomes margin, not measure. The reading column
+ * stays bounded. The architecture does not expand into a dashboard grid.
+ */
+@media (min-width: 100em) {
+  .axf-main {
+    padding-inline: var(--axf-space-16);
+  }
+}
+
+/*
+ * Reserved future right context panel.
+ * NOT implemented and NOT visually simulated in MVP
+ * (02_Application_Shell.md:41). No empty panel is rendered.
+ */

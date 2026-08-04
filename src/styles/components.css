@@ -1,0 +1,1420 @@
+/*
+ * AXIORA component styles.
+ *
+ * Authority: 02.5_Visual_Identity/13_Design_Tokens.md (three-layer taxonomy),
+ *            04_Workspace_Architecture/10_Component_Inventory.md (component contracts),
+ *            04_Workspace_Architecture/13_Accessibility_Workspace.md,
+ *            04_Workspace_Architecture/12_Responsive_Workspace.md,
+ *            decision K-18 (touch targets).
+ *
+ * BINDING RULES OBSERVED IN THIS FILE
+ *
+ * 1. NO NEW RAW VALUES. Every colour, size, and space references a token from
+ *    tokens.css. A literal hex or px value here would be an unapproved visual
+ *    identity decision (see the interim identity policy in tokens.css).
+ *
+ * 2. COLOUR IS NEVER THE ONLY CARRIER OF MEANING
+ *    (13_Accessibility_Workspace.md:30). Claim class, source state, correction
+ *    fields, readiness, and active navigation all render their meaning as TEXT in
+ *    the component markup. CSS here only adds a secondary cue — border weight,
+ *    position, or spacing. Removing this entire stylesheet must not remove any
+ *    information, and that is the test to apply before adding any rule below.
+ *
+ * 3. NO LAYOUT-DRIVEN REORDERING. No rule changes source order, because source
+ *    order is the evidence-to-understanding sequence (09_Reading_Flows.md:5).
+ *
+ * 4. NO DECORATIVE VISUAL LANGUAGE. No gradient, shadow stack, invented symbol,
+ *    or iconography. Restraint is a brand requirement, not a shortcut.
+ *
+ * 5. NOTHING HERE IS AN APPROVED VISUAL IDENTITY. Structure and hierarchy only.
+ */
+
+/* ======================================================================
+ * SHELL ADDITIONS — header controls and sidebar region
+ * ================================================================== */
+
+/*
+ * Header navigation control and search entry.
+ * Both are links (WorkspaceHeader.astro explains why), so they inherit the
+ * .axf-touch-target sizing from base.css. These rules only place them.
+ */
+.axf-header-nav-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: var(--axf-color-text-primary);
+  text-decoration: none;
+  border-radius: var(--axf-radius-md);
+}
+
+.axf-header-search {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+  /* Pushed to the trailing edge; the context title takes the free space. */
+  margin-inline-start: auto;
+  min-inline-size: 14rem;
+  padding-inline: var(--axf-space-3);
+  font-size: var(--axf-font-size-sm);
+  color: var(--axf-color-link);
+  border: var(--axf-border-width) solid var(--axf-color-border);
+  border-radius: var(--axf-radius-md);
+  text-decoration: none;
+}
+
+.axf-header-search kbd {
+  margin-inline-start: auto;
+  padding: var(--axf-space-1) var(--axf-space-2);
+  color: var(--axf-color-text-tertiary);
+  background: var(--axf-color-surface-sunken);
+  border: var(--axf-border-width) solid var(--axf-color-border);
+  border-radius: var(--axf-radius-sm);
+  font-family: var(--axf-font-family-mono);
+  font-size: var(--axf-font-size-xs);
+}
+
+.axf-header-search:hover {
+  border-color: var(--axf-color-border-strong);
+}
+
+/* Desktop keeps the drawer permanently open, so the control is not rendered. */
+@media (min-width: 48em) {
+  .axf-header-nav-control {
+    display: none;
+  }
+}
+
+@media (max-width: 40em) {
+  .axf-header-context,
+  .axf-header-search span,
+  .axf-header-search kbd {
+    display: none;
+  }
+
+  .axf-header-search {
+    min-inline-size: var(--axf-touch-target-min);
+  }
+
+  .axf-header-search::before {
+    content: '/';
+  }
+}
+
+/* ======================================================================
+ * CONSOLE SIDEBAR SYSTEM
+ * ================================================================== */
+.axf-sidebar-inner {
+  block-size: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--axf-sidebar-padding);
+}
+
+.axf-sidebar-brand {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--axf-space-2);
+  padding-inline: var(--axf-sidebar-content-padding);
+}
+
+.axf-sidebar-logo {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--axf-sidebar-item-gap);
+  min-block-size: var(--axf-sidebar-item-height);
+  color: var(--axf-color-text-primary);
+  text-decoration: none;
+}
+
+.axf-sidebar-toggle {
+  display: none;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--axf-color-text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--axf-sidebar-radius);
+  font: inherit;
+  cursor: pointer;
+}
+
+.axf-sidebar-toggle:hover {
+  color: var(--axf-color-text-primary);
+  background: var(--axf-sidebar-item-active-bg);
+}
+
+.axf-sidebar-logo > span:last-child {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.axf-sidebar-logo strong {
+  font-size: var(--axf-sidebar-type-label);
+  font-weight: var(--axf-font-weight-semibold);
+  line-height: var(--axf-line-height-tight);
+  letter-spacing: var(--axf-sidebar-tracking-brand);
+}
+
+.axf-sidebar-logo small {
+  color: var(--axf-color-text-tertiary);
+  font-size: var(--axf-sidebar-type-caption);
+  line-height: var(--axf-line-height-snug);
+  white-space: nowrap;
+}
+
+.axf-sidebar-search-region {
+  flex: 0 0 auto;
+  margin-block-start: var(--axf-space-6);
+}
+
+.axf-sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: var(--axf-sidebar-item-gap);
+  min-block-size: var(--axf-sidebar-item-height);
+  padding-inline: var(--axf-sidebar-content-padding);
+  color: var(--axf-color-text-secondary);
+  background: var(--axf-color-surface);
+  border: var(--axf-border-width) solid var(--axf-color-border);
+  border-radius: var(--axf-sidebar-radius);
+  font-size: var(--axf-sidebar-type-label);
+  line-height: var(--axf-line-height-tight);
+  text-decoration: none;
+  transition:
+    border-color var(--axf-duration-fast) var(--axf-easing-standard),
+    background var(--axf-duration-fast) var(--axf-easing-standard),
+    color var(--axf-duration-fast) var(--axf-easing-standard);
+}
+
+.axf-sidebar-search:hover {
+  color: var(--axf-color-text-primary);
+  background: var(--axf-color-surface-raised);
+  border-color: var(--axf-color-border-strong);
+}
+
+.axf-sidebar-search kbd {
+  margin-inline-start: auto;
+  padding: var(--axf-space-1) var(--axf-space-2);
+  color: var(--axf-color-text-tertiary);
+  background: var(--axf-color-surface-sunken);
+  border: var(--axf-border-width) solid var(--axf-color-border);
+  border-radius: var(--axf-radius-sm);
+  font-family: var(--axf-font-family-mono);
+  font-size: var(--axf-sidebar-type-caption);
+  line-height: var(--axf-line-height-tight);
+}
+
+.axf-sidebar-navigation {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  margin-block-start: var(--axf-space-8);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-inline: var(--axf-sidebar-content-padding);
+}
+
+.axf-sidebar-section {
+  margin: 0;
+}
+
+.axf-sidebar-section + .axf-sidebar-section {
+  margin-block-start: var(--axf-sidebar-section-gap);
+}
+
+.axf-sidebar-section-title {
+  margin: 0 0 var(--axf-space-3);
+  padding-inline: var(--axf-sidebar-content-padding);
+  color: var(--axf-color-text-tertiary);
+  font-size: var(--axf-sidebar-type-section);
+  font-weight: var(--axf-font-weight-semibold);
+  letter-spacing: var(--axf-sidebar-tracking-section);
+  line-height: var(--axf-line-height-tight);
+  text-transform: uppercase;
+}
+
+.axf-sidebar-section-items,
+.axf-sidebar-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--axf-sidebar-control-gap);
+}
+
+.axf-sidebar-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  inline-size: 100%;
+  min-block-size: var(--axf-sidebar-item-height);
+  gap: var(--axf-sidebar-item-gap);
+  padding-inline: var(--axf-sidebar-content-padding);
+  color: var(--axf-color-text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--axf-sidebar-radius);
+  font: inherit;
+  font-size: var(--axf-sidebar-type-label);
+  font-weight: var(--axf-font-weight-regular);
+  line-height: var(--axf-line-height-tight);
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--axf-duration-fast) var(--axf-easing-standard),
+    color var(--axf-duration-fast) var(--axf-easing-standard);
+}
+
+.axf-sidebar-item:hover {
+  color: var(--axf-color-text-primary);
+  background: var(--axf-sidebar-item-active-bg);
+}
+
+.axf-sidebar-item:focus-visible,
+.axf-sidebar-search:focus-visible,
+.axf-sidebar-logo:focus-visible,
+.axf-workspace-card:focus-visible,
+.axf-sidebar-group-trigger:focus-visible {
+  position: relative;
+  z-index: var(--axf-z-drawer);
+}
+
+.axf-sidebar-item[aria-current='page'] {
+  color: var(--axf-color-text-primary);
+  background: var(--axf-sidebar-item-active-bg);
+  font-weight: var(--axf-font-weight-medium);
+}
+
+.axf-sidebar-item[aria-current='page']::before {
+  position: absolute;
+  inset-block: var(--axf-space-3);
+  inset-inline-start: 0;
+  inline-size: var(--axf-border-width-thick);
+  content: '';
+  background: var(--axf-color-accent);
+  border-radius: 0 var(--axf-radius-sm) var(--axf-radius-sm) 0;
+}
+
+.axf-sidebar-icon {
+  inline-size: var(--axf-sidebar-icon-size);
+  block-size: var(--axf-sidebar-icon-size);
+  color: var(--axf-color-text-tertiary);
+  transition:
+    color var(--axf-duration-fast) var(--axf-easing-standard),
+    transform var(--axf-duration-fast) var(--axf-easing-standard);
+}
+
+.axf-sidebar-icon-box {
+  display: inline-grid;
+  flex: 0 0 var(--axf-sidebar-icon-size);
+  place-items: center;
+  inline-size: var(--axf-sidebar-icon-size);
+  block-size: var(--axf-sidebar-icon-size);
+}
+
+.axf-sidebar-item:hover .axf-sidebar-icon,
+.axf-sidebar-item[aria-current='page'] .axf-sidebar-icon { color: var(--axf-color-accent); }
+
+.axf-sidebar-item-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-inline-size: 0;
+  gap: 0;
+}
+
+.axf-sidebar-item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.axf-sidebar-item-content small {
+  color: var(--axf-color-text-tertiary);
+  font-size: var(--axf-sidebar-type-caption);
+  font-weight: var(--axf-font-weight-regular);
+  line-height: var(--axf-line-height-tight);
+}
+
+.axf-sidebar-group { margin-block-start: var(--axf-space-2); }
+
+.axf-sidebar-group-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: var(--axf-sidebar-item-height);
+  padding-inline: var(--axf-sidebar-content-padding);
+  color: var(--axf-color-text-tertiary);
+  border-radius: var(--axf-sidebar-radius);
+  cursor: pointer;
+  font-size: var(--axf-sidebar-type-caption);
+  letter-spacing: var(--axf-sidebar-tracking-control);
+  line-height: var(--axf-line-height-tight);
+  text-transform: uppercase;
+}
+
+.axf-sidebar-group-trigger:hover { color: var(--axf-color-text-primary); background: var(--axf-sidebar-item-active-bg); }
+.axf-sidebar-group-trigger .axf-sidebar-icon { transition: transform var(--axf-duration-fast) var(--axf-easing-standard); }
+.axf-sidebar-group[open] .axf-sidebar-group-trigger .axf-sidebar-icon { transform: rotate(90deg); }
+.axf-sidebar-group-items { padding-block-start: var(--axf-sidebar-control-gap); animation: axf-sidebar-reveal var(--axf-duration-fast) var(--axf-easing-standard); }
+
+@keyframes axf-sidebar-reveal { from { opacity: 0; transform: translateY(calc(-1 * var(--axf-space-1))); } to { opacity: 1; transform: translateY(0); } }
+
+.axf-sidebar-footer {
+  position: relative;
+  flex: 0 0 auto;
+  margin-block-start: var(--axf-space-4);
+  padding: var(--axf-space-3) var(--axf-sidebar-content-padding) 0;
+  border-block-start: var(--axf-border-width) solid var(--axf-sidebar-border);
+}
+
+.axf-workspace-block {
+  margin: 0;
+}
+
+.axf-workspace-card {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--axf-sidebar-item-gap);
+  block-size: calc(var(--axf-sidebar-item-height) + var(--axf-space-4));
+  padding: var(--axf-space-2);
+  color: var(--axf-color-text-primary);
+  background: var(--axf-color-surface-raised);
+  border: var(--axf-border-width) solid var(--axf-color-border);
+  border-radius: var(--axf-sidebar-radius);
+  text-decoration: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    border-color var(--axf-duration-fast) var(--axf-easing-standard),
+    background var(--axf-duration-fast) var(--axf-easing-standard);
+}
+
+.axf-workspace-card:hover {
+  background: var(--axf-color-surface);
+  border-color: var(--axf-color-border-strong);
+}
+
+.axf-workspace-card[aria-expanded='true'] {
+  background: var(--axf-sidebar-item-active-bg);
+  border-color: var(--axf-color-border-strong);
+}
+
+.axf-account-menu-chevron {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+}
+
+.axf-account-menu-chevron .axf-sidebar-icon {
+  inline-size: var(--axf-space-4);
+  block-size: var(--axf-space-4);
+  transform: rotate(180deg);
+}
+
+.axf-workspace-card[aria-expanded='true'] .axf-account-menu-chevron .axf-sidebar-icon {
+  transform: rotate(0);
+}
+
+.axf-account-menu {
+  position: absolute;
+  z-index: var(--axf-z-drawer);
+  inset-inline-start: 0;
+  inset-block-end: calc(100% + var(--axf-space-3));
+  inline-size: max(100%, 15rem);
+  padding: var(--axf-space-2);
+  color: var(--axf-color-text-primary);
+  background: var(--axf-color-surface-raised);
+  border: var(--axf-border-width) solid var(--axf-color-border-strong);
+  border-radius: var(--axf-radius-lg);
+  box-shadow: 0 var(--axf-space-2) var(--axf-space-8) color-mix(in srgb, var(--axf-color-text-primary) 16%, transparent);
+  transform-origin: bottom left;
+  animation: axf-account-menu-in var(--axf-duration-medium) var(--axf-easing-standard);
+}
+
+.axf-account-menu[hidden] { display: none; }
+
+@keyframes axf-account-menu-in {
+  from { opacity: 0; transform: translateY(var(--axf-space-2)) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.axf-account-menu-heading {
+  display: flex;
+  flex-direction: column;
+  padding: var(--axf-space-3);
+}
+
+.axf-account-menu-heading strong { font-size: var(--axf-sidebar-type-label); }
+.axf-account-menu-heading small { color: var(--axf-color-text-tertiary); font-size: var(--axf-sidebar-type-caption); }
+
+.axf-account-menu-group {
+  display: flex;
+  flex-direction: column;
+  padding-block: var(--axf-space-1);
+  border-block-start: var(--axf-border-width) solid var(--axf-color-border);
+}
+
+.axf-account-menu-group > a,
+.axf-account-menu-group > button {
+  display: flex;
+  align-items: center;
+  gap: var(--axf-space-3);
+  min-block-size: var(--axf-sidebar-item-height);
+  padding-inline: var(--axf-space-3);
+  color: var(--axf-color-text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: var(--axf-sidebar-radius);
+  font: inherit;
+  font-size: var(--axf-sidebar-type-label);
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.axf-account-menu-group > :is(a, button):hover,
+.axf-account-menu-group > :is(a, button):focus-visible,
+.axf-account-menu-group > [aria-current='page'] {
+  color: var(--axf-color-text-primary);
+  background: var(--axf-sidebar-item-active-bg);
+}
+
+.axf-account-menu-group > :is(a, button):hover .axf-sidebar-icon,
+.axf-account-menu-group > :is(a, button):focus-visible .axf-sidebar-icon { color: var(--axf-color-accent); }
+.axf-account-menu-group > :is(a, button) small { margin-inline-start: auto; color: var(--axf-color-text-tertiary); }
+
+@media (max-width: 47.99em) {
+  .axf-account-menu {
+    position: fixed;
+    inset: var(--axf-space-4);
+    inline-size: auto;
+    max-block-size: calc(100dvh - var(--axf-space-8));
+    overflow-y: auto;
+    transform-origin: bottom center;
+  }
+}
+
+.axf-sidebar-avatar {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  inline-size: var(--axf-space-8);
+  block-size: var(--axf-space-8);
+  color: var(--axf-color-text-inverse);
+  background: var(--axf-color-accent);
+  border-radius: 50%;
+  font-family: var(--axf-font-family-mono);
+  font-size: var(--axf-sidebar-type-caption);
+  line-height: var(--axf-line-height-tight);
+}
+
+.axf-workspace-identity {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.axf-workspace-identity strong,
+.axf-workspace-identity small,
+.axf-workspace-user {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.axf-workspace-identity strong {
+  font-size: var(--axf-sidebar-type-label);
+  font-weight: var(--axf-font-weight-semibold);
+  line-height: var(--axf-line-height-tight);
+}
+
+.axf-workspace-user,
+.axf-workspace-identity small {
+  color: var(--axf-color-text-tertiary);
+  font-size: var(--axf-sidebar-type-caption);
+  font-weight: var(--axf-font-weight-regular);
+  line-height: var(--axf-line-height-tight);
+}
+
+.axf-workspace-shortcuts,
+.axf-sidebar-bottom-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--axf-sidebar-control-gap);
+}
+
+.axf-workspace-shortcuts {
+  margin-block-start: var(--axf-space-2);
+}
+
+.axf-sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  margin-block-start: var(--axf-space-4);
+}
+
+.axf-sidebar-version {
+  display: flex;
+  justify-content: space-between;
+  margin-block-start: var(--axf-space-3);
+  padding-inline: var(--axf-sidebar-content-padding);
+  color: var(--axf-color-text-tertiary);
+  font-family: var(--axf-font-family-mono);
+  font-size: var(--axf-sidebar-type-caption);
+  line-height: var(--axf-line-height-tight);
+  letter-spacing: var(--axf-sidebar-tracking-meta);
+}
+
+@media (min-width: 48em) {
+  .axf-sidebar-inner {
+    block-size: calc(100dvh - var(--axf-header-height));
+  }
+
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-inner { padding-inline: var(--axf-sidebar-padding); }
+  .axf-sidebar-toggle { display: inline-flex; }
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-logo > span:last-child,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-search span,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-search kbd,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-section-title,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-item-content,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-group,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-workspace-identity,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-account-menu-chevron { display: none; }
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-logo,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-search,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-item,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-workspace-card { justify-content: center; padding-inline: var(--axf-sidebar-content-padding); }
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-brand,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-navigation,
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-footer { padding-inline: 0; }
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-navigation { scrollbar-gutter: auto; }
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-footer { margin-block-start: var(--axf-space-4); }
+  .axf-shell[data-sidebar-collapsed='true'] .axf-workspace-card { block-size: var(--axf-sidebar-item-height); min-block-size: var(--axf-sidebar-item-height); background: transparent; border-color: transparent; }
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-brand { flex-direction: column; }
+  .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-logo { flex: 0 0 auto; }
+  .axf-shell[data-sidebar-collapsed='true'] .axf-account-menu { inset-inline-start: calc(100% + var(--axf-space-4)); inset-block-end: 0; inline-size: 15rem; transform-origin: bottom left; }
+}
+
+/* ======================================================================
+ * READING HEADER
+ * ================================================================== */
+
+.axf-reading-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--axf-space-3);
+  margin-bottom: var(--axf-space-8);
+  padding-bottom: var(--axf-space-5);
+  border-bottom: var(--axf-border-width) solid var(--axf-color-border);
+}
+
+.axf-reading-title {
+  margin: 0;
+  font-size: var(--axf-font-size-2xl);
+  line-height: var(--axf-line-height-tight);
+  font-weight: var(--axf-font-weight-semibold);
+  /* Sticky header must never hide an anchored title (Application_Shell.md:12). */
+  scroll-margin-top: calc(var(--axf-header-height) + var(--axf-space-4));
+}
+
+.axf-reading-summary {
+  margin: 0;
+  max-width: var(--axf-measure-reading);
+  font-size: var(--axf-font-size-md);
+  line-height: var(--axf-line-height-normal);
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-reading-badges,
+.axf-metadata-badges {
+  display: flex;
+  flex-wrap: wrap;
+  /* K-18: separation for targets that cannot be enlarged. */
+  gap: var(--axf-touch-target-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * Status note. Prose, not a coloured chip — the explanation must survive being
+ * read aloud (13_Accessibility_Workspace.md:30).
+ */
+.axf-reading-status-note,
+.axf-metadata-status-note {
+  margin: 0;
+  max-width: var(--axf-measure-reading);
+  font-size: var(--axf-font-size-sm);
+  line-height: var(--axf-line-height-normal);
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-reading-dates,
+.axf-source-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--axf-space-4);
+  margin: 0;
+  font-size: var(--axf-font-size-sm);
+  color: var(--axf-color-text-tertiary);
+}
+
+.axf-reading-date {
+  display: inline-flex;
+  gap: var(--axf-space-1);
+}
+
+.axf-reading-scope {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--axf-space-2);
+  font-size: var(--axf-font-size-sm);
+}
+
+.axf-reading-scope-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--axf-touch-target-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * Topic scope entries. A tag is a LINK when its target is discoverable and a
+ * plain span when it is not; the two are styled differently on purpose so a
+ * static tag never looks clickable.
+ */
+.axf-tag {
+  display: inline-block;
+  padding: var(--axf-space-1) var(--axf-space-2);
+  font-size: var(--axf-font-size-xs);
+  border: var(--axf-border-width) solid var(--axf-color-border);
+  border-radius: var(--axf-radius-sm);
+}
+
+.axf-tag-static {
+  color: var(--axf-color-text-tertiary);
+  border-style: dashed;
+}
+
+/* ======================================================================
+ * BADGE
+ * ================================================================== */
+
+.axf-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--axf-space-1);
+  padding: var(--axf-space-1) var(--axf-space-2);
+  font-size: var(--axf-font-size-xs);
+  line-height: var(--axf-line-height-tight);
+  border: var(--axf-border-width) solid var(--axf-badge-border);
+  border-radius: var(--axf-radius-sm);
+  white-space: nowrap;
+}
+
+/*
+ * Dimension prefix ("Status:", "Tingkat:"). Kept visible rather than hidden,
+ * because a bare word like "Lanjutan" is ambiguous without its dimension.
+ */
+.axf-badge-dimension {
+  color: var(--axf-color-text-tertiary);
+}
+
+.axf-badge-label {
+  font-weight: var(--axf-font-weight-medium);
+}
+
+/*
+ * Badge kinds differ by border weight, never by hue alone. A future-phase badge
+ * gets a dashed border so "not current" is visible without colour.
+ */
+.axf-badge-status {
+  border-color: var(--axf-color-state-current);
+}
+
+.axf-badge-content-type {
+  border-color: var(--axf-color-border);
+}
+
+.axf-badge-difficulty {
+  border-color: var(--axf-color-border);
+}
+
+.axf-badge-future {
+  border-style: dashed;
+  color: var(--axf-color-text-secondary);
+}
+
+/* ======================================================================
+ * EVIDENCE BLOCK
+ * ================================================================== */
+
+.axf-evidence {
+  margin: var(--axf-space-6) 0;
+  max-width: var(--axf-measure-supporting);
+}
+
+.axf-evidence-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--axf-space-4);
+}
+
+/*
+ * Each claim carries a leading border. This is a grouping cue only; the claim
+ * class is stated in text by .axf-evidence-class immediately before the content.
+ */
+.axf-evidence-item {
+  padding-inline-start: var(--axf-space-4);
+  border-inline-start: var(--axf-border-width-thick) solid var(--axf-evidence-border);
+}
+
+.axf-evidence-class {
+  display: block;
+  font-size: var(--axf-font-size-xs);
+  font-weight: var(--axf-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-evidence-content {
+  margin: var(--axf-space-1) 0 0;
+  line-height: var(--axf-line-height-normal);
+}
+
+.axf-evidence-source-ref {
+  display: block;
+  margin-top: var(--axf-space-1);
+  font-size: var(--axf-font-size-sm);
+  color: var(--axf-color-text-tertiary);
+  font-style: normal; /* <cite> italic reduces legibility at this size. */
+}
+
+/*
+ * Claim-class variants.
+ *
+ * Interpretation and scenario are the two classes a reader is most likely to
+ * mistake for verified fact, so they are the two that get an additional
+ * NON-COLOUR cue (dashed border). The text label remains the primary signal.
+ */
+.axf-evidence-verified-fact {
+  border-inline-start-color: var(--axf-color-state-attention);
+}
+
+.axf-evidence-reported-view {
+  border-inline-start-color: var(--axf-color-border-strong);
+}
+
+.axf-evidence-axiora-interpretation {
+  border-inline-start-style: dashed;
+}
+
+.axf-evidence-scenario {
+  border-inline-start-style: dashed;
+  border-inline-start-color: var(--axf-color-border-strong);
+}
+
+.axf-evidence-unknown {
+  border-inline-start-style: dotted;
+}
+
+/* Honest empty state, never hidden. */
+.axf-evidence-empty,
+.axf-sources-empty,
+.axf-related-empty {
+  margin: 0;
+  font-size: var(--axf-font-size-sm);
+  color: var(--axf-color-text-secondary);
+}
+
+/* ======================================================================
+ * SOURCE BLOCK
+ * ================================================================== */
+
+.axf-sources {
+  margin: var(--axf-space-8) 0;
+  max-width: var(--axf-measure-supporting);
+}
+
+.axf-source-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--axf-space-3);
+}
+
+.axf-source {
+  padding: var(--axf-space-3);
+  background: var(--axf-source-bg);
+  border-radius: var(--axf-radius-md);
+  font-size: var(--axf-font-size-sm);
+  line-height: var(--axf-line-height-snug);
+}
+
+.axf-source-title {
+  font-weight: var(--axf-font-weight-medium);
+}
+
+.axf-source-publisher,
+.axf-source-note {
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-source-link {
+  word-break: break-word; /* Long URLs must not force horizontal scroll. */
+}
+
+/*
+ * Source state text. Present for every non-available source so provenance is
+ * never silently dropped.
+ */
+.axf-source-state {
+  display: inline-block;
+  font-size: var(--axf-font-size-xs);
+  color: var(--axf-color-text-tertiary);
+}
+
+/*
+ * An unavailable or archived source keeps its full citation and gains a dashed
+ * edge. The state is already stated in text; this only makes it scannable.
+ */
+.axf-source-unavailable,
+.axf-source-archived {
+  border-inline-start: var(--axf-border-width-thick) dashed var(--axf-color-border-strong);
+}
+
+/* ======================================================================
+ * CORRECTION BLOCK
+ * ================================================================== */
+
+.axf-corrections {
+  margin: var(--axf-space-8) 0;
+  max-width: var(--axf-measure-supporting);
+}
+
+.axf-corrections-intro {
+  margin: 0 0 var(--axf-space-4);
+  font-size: var(--axf-font-size-sm);
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-correction-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--axf-space-5);
+}
+
+/*
+ * A correction is flat prose, never a collapsed disclosure (K-03). The border
+ * marks it as a distinct record without hiding any field.
+ */
+.axf-correction {
+  padding: var(--axf-space-4);
+  border-inline-start: var(--axf-border-width-thick) solid var(--axf-correction-border);
+  background: var(--axf-color-surface-subtle);
+}
+
+.axf-correction-date {
+  display: block;
+  font-size: var(--axf-font-size-xs);
+  font-weight: var(--axf-font-weight-semibold);
+  color: var(--axf-color-text-secondary);
+}
+
+/*
+ * Field list. A description list keeps each K-03 field paired with its label in
+ * the accessibility tree, which a table of unlabelled cells would not.
+ */
+.axf-correction-fields {
+  margin: var(--axf-space-2) 0 0;
+  font-size: var(--axf-font-size-sm);
+  line-height: var(--axf-line-height-normal);
+}
+
+.axf-correction-field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--axf-space-2);
+  padding: var(--axf-space-1) 0;
+}
+
+.axf-correction-field dt {
+  flex: 0 0 auto;
+  font-weight: var(--axf-font-weight-medium);
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-correction-field dd {
+  flex: 1 1 20ch;
+  margin: 0;
+}
+
+/* ======================================================================
+ * RELATED TOPICS / LEARN NEXT
+ * ================================================================== */
+
+.axf-related {
+  margin: var(--axf-space-8) 0;
+  max-width: var(--axf-measure-supporting);
+}
+
+.axf-section-heading {
+  margin: 0 0 var(--axf-space-3);
+  font-size: var(--axf-font-size-lg);
+  font-weight: var(--axf-font-weight-semibold);
+  scroll-margin-top: calc(var(--axf-header-height) + var(--axf-space-4));
+}
+
+.axf-related-group + .axf-related-group {
+  margin-top: var(--axf-space-5);
+}
+
+.axf-related-group-label {
+  display: block;
+  margin-bottom: var(--axf-space-2);
+  font-size: var(--axf-font-size-xs);
+  font-weight: var(--axf-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--axf-color-text-tertiary);
+}
+
+.axf-related-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--axf-space-3);
+}
+
+.axf-related-item {
+  padding-bottom: var(--axf-space-3);
+  border-bottom: var(--axf-border-width) solid var(--axf-color-border);
+}
+
+.axf-related-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.axf-related-link {
+  display: inline-block;
+  min-height: var(--axf-touch-target-min);
+  font-weight: var(--axf-font-weight-medium);
+  line-height: var(--axf-line-height-snug);
+}
+
+/* Relationship type, stated in text so the reason for the link is explicit. */
+.axf-related-type {
+  display: block;
+  font-size: var(--axf-font-size-xs);
+  color: var(--axf-color-text-tertiary);
+}
+
+/*
+ * Editorial rationale (11_Interaction_Specification.md:24). Learn Next is an
+ * editorial decision, not an algorithmic recommendation, so the reason is
+ * readable prose rather than a score.
+ */
+.axf-related-rationale {
+  margin: var(--axf-space-1) 0 0;
+  font-size: var(--axf-font-size-sm);
+  line-height: var(--axf-line-height-normal);
+  color: var(--axf-color-text-secondary);
+}
+
+/* ======================================================================
+ * SEARCH
+ * ================================================================== */
+
+.axf-search {
+  max-width: var(--axf-measure-reading);
+}
+
+.axf-search-label {
+  display: block;
+  margin-bottom: var(--axf-space-2);
+  font-size: var(--axf-font-size-sm);
+  font-weight: var(--axf-font-weight-medium);
+}
+
+.axf-search-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--axf-touch-target-gap);
+}
+
+.axf-search-input {
+  flex: 1 1 16ch;
+  min-height: var(--axf-touch-target-min);
+  padding: var(--axf-space-2) var(--axf-space-3);
+  font: inherit;
+  font-size: var(--axf-font-size-base); /* >=16px avoids iOS zoom-on-focus. */
+  color: var(--axf-color-text-primary);
+  background: var(--axf-color-surface);
+  border: var(--axf-border-width) solid var(--axf-color-border-strong);
+  border-radius: var(--axf-radius-md);
+}
+
+.axf-search-submit {
+  flex: 0 0 auto;
+  min-height: var(--axf-touch-target-min);
+  min-width: var(--axf-touch-target-min);
+  padding: var(--axf-space-2) var(--axf-space-4);
+  font: inherit;
+  font-size: var(--axf-font-size-sm);
+  font-weight: var(--axf-font-weight-medium);
+  color: var(--axf-color-text-primary);
+  background: var(--axf-color-surface-sunken);
+  border: var(--axf-border-width) solid var(--axf-color-border-strong);
+  border-radius: var(--axf-radius-md);
+  cursor: pointer;
+}
+
+.axf-search-submit:hover {
+  background: var(--axf-color-surface-subtle);
+}
+
+.axf-search-corpus-note,
+.axf-search-guidance {
+  margin: var(--axf-space-3) 0 0;
+  font-size: var(--axf-font-size-sm);
+  line-height: var(--axf-line-height-normal);
+  color: var(--axf-color-text-secondary);
+}
+
+/* The header variant is compact; the page variant is the full form. */
+.axf-search-header {
+  max-width: none;
+}
+
+.axf-search-page {
+  margin-bottom: var(--axf-space-8);
+}
+
+/* ======================================================================
+ * SECTION DIVIDER
+ * ================================================================== */
+
+.axf-divider {
+  margin: var(--axf-space-8) 0;
+  border: 0;
+  border-top: var(--axf-border-width) solid var(--axf-color-border);
+}
+
+/*
+ * Labelled variant. The label is a real accessible name on a separator, so the
+ * structural break is announced instead of being purely visual.
+ */
+.axf-divider-labelled {
+  display: flex;
+  align-items: center;
+  gap: var(--axf-space-3);
+  margin: var(--axf-space-10) 0 var(--axf-space-6);
+  border-top: var(--axf-border-width) solid var(--axf-color-border);
+  padding-top: var(--axf-space-3);
+}
+
+.axf-divider-label {
+  font-size: var(--axf-font-size-xs);
+  font-weight: var(--axf-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--axf-color-text-tertiary);
+}
+
+/* ======================================================================
+ * PAGINATION
+ * ================================================================== */
+
+.axf-pagination {
+  display: flex;
+  flex-direction: column;
+  gap: var(--axf-space-3);
+  margin: var(--axf-space-10) 0 var(--axf-space-4);
+  padding-top: var(--axf-space-4);
+  border-top: var(--axf-border-width) solid var(--axf-color-border);
+}
+
+/*
+ * Position text ("Halaman N dari M"). Required so the reader always knows where
+ * they are in a finite sequence — the counter to infinite scroll, which
+ * 14_Implementation_Acceptance_Criteria.md:55 forbids.
+ */
+.axf-pagination-position {
+  font-size: var(--axf-font-size-sm);
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-pagination-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--axf-touch-target-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.axf-pagination-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--axf-touch-target-min);
+  min-width: var(--axf-touch-target-min);
+  padding-inline: var(--axf-space-3);
+  border: var(--axf-border-width) solid var(--axf-color-border);
+  border-radius: var(--axf-radius-md);
+  text-decoration: none;
+}
+
+.axf-pagination-link:hover {
+  border-color: var(--axf-color-border-strong);
+}
+
+/*
+ * Current page. aria-current carries the meaning; the heavier border is the
+ * visual echo.
+ */
+.axf-pagination-link[aria-current='page'] {
+  border-width: var(--axf-border-width-thick);
+  border-color: var(--axf-color-state-current);
+  font-weight: var(--axf-font-weight-semibold);
+}
+
+/*
+ * Disabled edge. Rendered as a non-interactive span by the component, not a
+ * dead link, so there is no focusable control that does nothing.
+ */
+.axf-pagination-link-disabled {
+  color: var(--axf-color-text-tertiary);
+  border-style: dashed;
+}
+
+.axf-pagination-page {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ======================================================================
+ * METADATA / DISCLOSURE / EMPTY STATE
+ * ================================================================== */
+
+.axf-metadata {
+  margin: 0 0 var(--axf-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--axf-space-2);
+  font-size: var(--axf-font-size-sm);
+}
+
+.axf-metadata-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--axf-space-1);
+}
+
+.axf-metadata-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--axf-space-2);
+}
+
+.axf-metadata-row dt {
+  font-weight: var(--axf-font-weight-medium);
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-metadata-row dd {
+  margin: 0;
+}
+
+/*
+ * Disclosure boundary (11_Interaction_Specification.md:23). Collapsing must
+ * never hide evidence, sources, or corrections; it is only used for genuinely
+ * supplementary depth.
+ */
+.axf-disclosure {
+  margin: var(--axf-space-4) 0;
+  border: var(--axf-border-width) solid var(--axf-color-border);
+  border-radius: var(--axf-radius-md);
+  padding: var(--axf-space-3);
+}
+
+.axf-disclosure-heading {
+  min-height: var(--axf-touch-target-min);
+  display: flex;
+  align-items: center;
+  font-size: var(--axf-font-size-sm);
+  font-weight: var(--axf-font-weight-medium);
+  cursor: pointer;
+}
+
+/*
+ * Empty state. A stated status, never filler
+ * (04_Knowledge_Navigation.md:66).
+ */
+.axf-empty-state {
+  margin: var(--axf-space-6) 0;
+  padding: var(--axf-space-5);
+  max-width: var(--axf-measure-reading);
+  border: var(--axf-border-width) dashed var(--axf-color-border-strong);
+  border-radius: var(--axf-radius-md);
+  background: var(--axf-color-surface-subtle);
+}
+
+.axf-empty-state-title {
+  margin: 0 0 var(--axf-space-2);
+  font-size: var(--axf-font-size-md);
+  font-weight: var(--axf-font-weight-semibold);
+}
+
+.axf-empty-state-body {
+  margin: 0;
+  line-height: var(--axf-line-height-normal);
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-empty-state-links {
+  margin: var(--axf-space-4) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--axf-touch-target-gap);
+}
+
+/* ======================================================================
+ * UNAVAILABLE ROUTE — content-readiness state
+ * ================================================================== */
+
+/*
+ * This is a content-readiness state, not an error page and not a feature. It
+ * states plainly that the content is not yet published, explains that the route
+ * is neither missing nor broken, and always offers recovery.
+ *
+ * Styling stays deliberately plain: an eye-catching treatment would read as a
+ * designed "coming soon" promotion, which would imply a delivery commitment the
+ * project has not made.
+ */
+.axf-unavailable {
+  margin: var(--axf-space-6) 0;
+  padding: var(--axf-space-6);
+  max-width: var(--axf-measure-reading);
+  border: var(--axf-border-width) solid var(--axf-color-border-strong);
+  border-radius: var(--axf-radius-md);
+  background: var(--axf-color-surface-subtle);
+}
+
+.axf-unavailable-title {
+  margin: 0 0 var(--axf-space-3);
+  font-size: var(--axf-font-size-xl);
+  line-height: var(--axf-line-height-tight);
+  font-weight: var(--axf-font-weight-semibold);
+}
+
+.axf-unavailable-statement {
+  margin: 0 0 var(--axf-space-3);
+  font-size: var(--axf-font-size-md);
+  line-height: var(--axf-line-height-normal);
+}
+
+.axf-unavailable-reason,
+.axf-unavailable-boundary {
+  margin: 0 0 var(--axf-space-3);
+  line-height: var(--axf-line-height-normal);
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-unavailable-recovery {
+  margin-top: var(--axf-space-5);
+  padding-top: var(--axf-space-4);
+  border-top: var(--axf-border-width) solid var(--axf-color-border);
+}
+
+.axf-unavailable-recovery-heading {
+  margin: 0 0 var(--axf-space-3);
+  font-size: var(--axf-font-size-sm);
+  font-weight: var(--axf-font-weight-semibold);
+}
+
+.axf-unavailable-recovery-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--axf-touch-target-gap);
+}
+
+/*
+ * Development marker. Rendered only when AXIORA_ENV permits it and asserted
+ * absent from production builds. The heavy dashed edge is intentional: it must
+ * be impossible to mistake for reader-facing content during review.
+ */
+.axf-development-marker {
+  margin-top: var(--axf-space-5);
+  padding: var(--axf-space-3);
+  border: var(--axf-border-width-thick) dashed var(--axf-color-border-strong);
+  border-radius: var(--axf-radius-sm);
+  font-family: var(--axf-font-family-mono);
+  font-size: var(--axf-font-size-xs);
+  line-height: var(--axf-line-height-snug);
+  color: var(--axf-color-text-secondary);
+}
+
+.axf-development-marker-label {
+  display: block;
+  font-weight: var(--axf-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ======================================================================
+ * FORCED COLORS
+ * ================================================================== */
+
+/*
+ * In forced-colors mode the browser replaces authored colours. Border-based
+ * cues must survive, because several states above use border style as their
+ * secondary signal.
+ */
+@media (forced-colors: active) {
+  .axf-badge,
+  .axf-tag,
+  .axf-search-input,
+  .axf-search-submit,
+  .axf-pagination-link,
+  .axf-empty-state,
+  .axf-unavailable,
+  .axf-development-marker {
+    border-color: CanvasText;
+  }
+
+  .axf-evidence-item {
+    border-inline-start-color: CanvasText;
+  }
+}

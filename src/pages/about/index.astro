@@ -1,0 +1,19 @@
+---
+/**
+ * About.
+ *
+ * Authority: 06_Page_Inventory.md:21, 05_Sitemap.md:46.
+ *
+ * Group 9 replaces this page.
+ */
+
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES } from '../../lib/routes.ts';
+---
+
+<PendingRoutePage
+  path={ROUTES.about.path}
+  title={ROUTES.about.title}
+  description={ROUTES.about.description}
+  breadcrumbs={[{ label: 'AXIORA', path: ROUTES.home.path }, { label: ROUTES.about.title }]}
+/>

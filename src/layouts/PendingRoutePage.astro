@@ -1,0 +1,85 @@
+---
+/**
+ * PendingRoutePage — the page-level shell for an approved route whose content is
+ * not yet approved for publication.
+ *
+ * Authority: 04_Workspace_Architecture/06_Page_Inventory.md,
+ *            04_Workspace_Architecture/09_Reading_Flows.md:45,
+ *            route build-out decision item 5.
+ *
+ * This is a composition layer, not a content component. It introduces no content
+ * field and reads no corpus record; it only resolves a route's readiness and wires
+ * the layout correctly.
+ *
+ * It exists so that indexability cannot be set wrongly page by page. The
+ * unavailable state and indexable={false} are bound together here once, instead of
+ * being repeated across a dozen page files where one of them would eventually be
+ * missed.
+ *
+ * It also refuses to render a route the registry considers ready, because that
+ * would mean a real page was replaced by a readiness placeholder — silent content
+ * loss, and the failure mode most worth making loud.
+ */
+
+import WorkspaceLayout from '../layouts/WorkspaceLayout.astro';
+import UnavailableRoute from '../components/UnavailableRoute.astro';
+import type { Crumb } from '../components/Breadcrumb.astro';
+import { readinessOf } from '../lib/route-readiness.ts';
+import { isProductionBuild } from '../lib/env.ts';
+
+interface Props {
+  /** Application-relative path; the readiness registry key. */
+  path: string;
+  title: string;
+  description: string;
+  breadcrumbs?: Crumb[];
+}
+
+const { path, title, description, breadcrumbs = [] } = Astro.props;
+
+const readiness = readinessOf(path);
+
+if (readiness.state === 'ready') {
+  throw new Error(
+    `PendingRoutePage was rendered for "${path}", which the readiness registry marks as ready. ` +
+      'A ready route must render its real page. Refusing to replace approved content with a readiness placeholder.',
+  );
+}
+
+if (readiness.state === 'future-gated') {
+  throw new Error(
+    `"${path}" is future-gated and must not be routed at all. Sitemap.md:5: a listed future route ` +
+      'is an architectural reservation, not permission to implement it.',
+  );
+}
+
+/*
+ * A production build must never emit this page. The production gate
+ * (scripts/build-production.mjs) also checks this, but failing here as well means
+ * the guarantee holds even if someone runs `astro build` directly with
+ * AXIORA_ENV=production instead of going through the release script.
+ */
+if (isProductionBuild()) {
+  throw new Error(
+    `Route "${path}" has no content approved for publication and cannot be included in a production release. ` +
+      `Readiness registry reason: ${readiness.reason ?? 'not recorded'}`,
+  );
+}
+
+if (!readiness.reason) {
+  throw new Error(
+    `Route "${path}" is marked unavailable without a reason. The reason is shown to the reader and ` +
+      'is the production gate diagnostic; an unexplained unavailable state is not acceptable.',
+  );
+}
+---
+
+{/* indexable={false} is bound to the unavailable state here, once, deliberately. */}
+<WorkspaceLayout
+  title={title}
+  description={description}
+  breadcrumbs={breadcrumbs}
+  indexable={false}
+>
+  <UnavailableRoute title={title} reason={readiness.reason} />
+</WorkspaceLayout>

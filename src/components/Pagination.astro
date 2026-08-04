@@ -1,0 +1,103 @@
+---
+/**
+ * Pagination — traverse finite indexes.
+ *
+ * Authority: 10_Component_Inventory.md (Pagination: "Announces page position
+ *            and preserves query/category"; states first, middle, last, no
+ *            results),
+ *            11_Interaction_Specification.md:17 (invalid page recovers to
+ *            nearest valid index),
+ *            14_Implementation_Acceptance_Criteria.md:55 (no infinite scroll).
+ *
+ * STATIC-FIRST: every page link is a real emitted route. There is no
+ * client-side page-fetching. The current page number is known at build time
+ * because Astro generates one HTML file per page.
+ *
+ * QUERY PRESERVATION: the category and query parameters are passed through so
+ * a filtered index does not lose its filter when the reader pages forward.
+ *
+ * ANNOUNCEMENT: the nav landmark carries a unique label so screen readers can
+ * distinguish it from the sidebar navigation. The current page is announced
+ * via aria-current="page" on the link, and the position is stated in text
+ * ("Halaman 2 dari 5") so it is available without counting links.
+ */
+
+import { url } from '../lib/url.ts';
+
+interface Props {
+  /** Current 1-based page number. */
+  currentPage: number;
+  /** Total number of pages. */
+  totalPages: number;
+  /**
+   * Function that returns the route for a given page number.
+   * The caller owns the URL shape (e.g. /market-intelligence/page/2/).
+   */
+  pageUrl: (page: number) => string;
+  /** Preserve these query params across page links (e.g. topic filter). */
+  params?: Record<string, string>;
+}
+
+const { currentPage, totalPages, pageUrl, params = {} } = Astro.props;
+
+const hasPrev = currentPage > 1;
+const hasNext = currentPage < totalPages;
+
+function buildUrl(page: number): string {
+  const base = url(pageUrl(page));
+  const qs = new URLSearchParams(params).toString();
+  return qs ? `${base}?${qs}` : base;
+}
+---
+
+{
+  totalPages > 1 && (
+    <nav class="axf-pagination" aria-label="Navigasi halaman">
+      <p class="axf-pagination-position">
+        Halaman {currentPage} dari {totalPages}
+      </p>
+
+      <ul class="axf-pagination-list axf-touch-group">
+        <li>
+          {hasPrev ? (
+            <a class="axf-pagination-link" href={buildUrl(currentPage - 1)}>
+              <span aria-hidden="true">&larr;</span>
+              <span>Sebelumnya</span>
+            </a>
+          ) : (
+            <span class="axf-pagination-link axf-pagination-link-disabled" aria-disabled="true">
+              <span aria-hidden="true">&larr;</span>
+              <span>Sebelumnya</span>
+            </span>
+          )}
+        </li>
+
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <li>
+            <a
+              class="axf-pagination-link axf-pagination-page"
+              href={buildUrl(page)}
+              aria-current={page === currentPage ? 'page' : undefined}
+            >
+              {page}
+            </a>
+          </li>
+        ))}
+
+        <li>
+          {hasNext ? (
+            <a class="axf-pagination-link" href={buildUrl(currentPage + 1)}>
+              <span>Berikutnya</span>
+              <span aria-hidden="true">&rarr;</span>
+            </a>
+          ) : (
+            <span class="axf-pagination-link axf-pagination-link-disabled" aria-disabled="true">
+              <span>Berikutnya</span>
+              <span aria-hidden="true">&rarr;</span>
+            </span>
+          )}
+        </li>
+      </ul>
+    </nav>
+  )
+}

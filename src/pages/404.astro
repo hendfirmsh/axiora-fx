@@ -1,0 +1,47 @@
+---
+/**
+ * 404 — recoverable route after an invalid URL.
+ *
+ * Authority: 06_Page_Inventory.md:22, 05_Sitemap.md:48.
+ *
+ * This is a real page, not a readiness placeholder. It is the only page that
+ * is both 'ready' in the registry and carries indexable={false}.
+ *
+ * Astro serves this file for any unmatched route when output is 'static'.
+ * GitHub Pages also serves it for 404s at the custom domain.
+ */
+
+import WorkspaceLayout from '../layouts/WorkspaceLayout.astro';
+import { ROUTES, TOPIC_LABELS, topicPath } from '../lib/routes.ts';
+import { TOPICS } from '../lib/taxonomy.ts';
+import { url } from '../lib/url.ts';
+---
+
+<WorkspaceLayout
+  title={ROUTES.notFound.title}
+  description={ROUTES.notFound.description}
+  indexable={false}
+>
+  <div class="axf-prose">
+    <h1>Halaman tidak ditemukan</h1>
+    <p>
+      Jalur yang diminta tidak tersedia. Ini bukan konten yang disembunyikan —
+      alamat ini memang tidak ada di AXIORA.
+    </p>
+
+    <h2>Lanjutkan ke</h2>
+    <ul>
+      <li><a href={url(ROUTES.home.path)}>Workspace Home</a></li>
+      <li><a href={url(ROUTES.search.path)}>Cari pengetahuan</a></li>
+      <li><a href={url(ROUTES.glossary.path)}>Glossary</a></li>
+      <li><a href={url(ROUTES.methodology.path)}>Methodology</a></li>
+    </ul>
+
+    <h2>Jalur topik</h2>
+    <ul>
+      {TOPICS.map((topic) => (
+        <li><a href={url(topicPath(topic))}>{TOPIC_LABELS[topic]}</a></li>
+      ))}
+    </ul>
+  </div>
+</WorkspaceLayout>

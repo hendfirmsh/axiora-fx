@@ -1,0 +1,19 @@
+---
+/**
+ * Corrections index.
+ *
+ * Authority: 06_Page_Inventory.md:18, 05_Sitemap.md:44, decision K-03.
+ *
+ * Group 7 replaces this page. Correction detail routes are corpus-generated.
+ */
+
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES } from '../../lib/routes.ts';
+---
+
+<PendingRoutePage
+  path={ROUTES.corrections.path}
+  title={ROUTES.corrections.title}
+  description={ROUTES.corrections.description}
+  breadcrumbs={[{ label: 'AXIORA', path: ROUTES.home.path }, { label: ROUTES.corrections.title }]}
+/>

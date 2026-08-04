@@ -1,0 +1,139 @@
+---
+/**
+ * RelatedLinks — typed relationship rendering for Related Topics and Learn Next.
+ *
+ * Authority: 10_Component_Inventory.md (Related Topics: "Uses typed relationships
+ *            and concise rationale"; states populated, empty, unavailable.
+ *            Learn Next: "Ordered by editorial dependency, not personalization";
+ *            states populated, no next step),
+ *            02.8_Content_Architecture/08_Internal_Linking_Strategy.md,
+ *            11_Interaction_Specification.md:24 ("Learn Next is an editorial
+ *            relationship, never a personalized prediction or action prompt"),
+ *            09_Reading_Flows.md:18-20.
+ *
+ * ONE COMPONENT, TWO CONTRACTS
+ *
+ * Related Topics and Learn Next are listed separately in the inventory but share
+ * one mechanism: render typed relationships whose targets resolve inside the
+ * publishable corpus. They differ in WHICH relationship types they select and in
+ * their empty-state wording, both of which are props. Splitting the rendering
+ * into two near-identical files would let the two drift apart, and the one that
+ * drifted would be the one that leaked an unpublished target.
+ *
+ * TARGET FILTERING IS NOT OPTIONAL
+ *
+ * A relationship may point at a record that exists in the repository but is not
+ * publishable — a draft, or a test fixture. The caller resolves targets through
+ * src/lib/corpus.ts, which applies the production+public filter, and unresolved
+ * targets are dropped before they reach this component.
+ *
+ * This component applies the second half of that guarantee: it also drops targets
+ * whose ROUTE is not discoverable. Together these implement the directive that an
+ * unavailable route must not appear in related content or Learn Next.
+ *
+ * NO PERSONALIZATION: order comes from the editorial relationship array as
+ * authored. There is no ranking, no scoring, and no "recommended for you".
+ */
+
+import { RELATIONSHIP_LABELS } from '../lib/labels.ts';
+import { isDiscoverable } from '../lib/route-readiness.ts';
+import { url } from '../lib/url.ts';
+import type { RelationshipType } from '../lib/taxonomy.ts';
+
+export interface RelatedLink {
+  type: RelationshipType;
+  /** Resolved title of the target record. */
+  title: string;
+  /** Resolved application-relative route of the target record. */
+  path: string;
+  /** Editorial reason this relationship exists. */
+  rationale?: string;
+}
+
+interface Props {
+  /** Section heading, e.g. "Pelajari berikutnya" or "Konteks terkait". */
+  heading: string;
+  links: RelatedLink[];
+  /**
+   * Honest statement when no relationship of this kind exists.
+   * Component_Inventory requires an explicit "no next step" / "empty" state.
+   */
+  emptyStatement: string;
+  /** Group links under their relationship-type label. */
+  groupByType?: boolean;
+  headingLevel?: 2 | 3;
+  /** Stable id fragment for aria-labelledby. */
+  id: string;
+}
+
+const {
+  heading,
+  links,
+  emptyStatement,
+  groupByType = false,
+  headingLevel = 2,
+  id,
+} = Astro.props;
+
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const headingId = `axf-related-${id}-heading`;
+
+/*
+ * Drop targets whose route is not discoverable. An unavailable route must not be
+ * surfaced through related content or Learn Next, even though the record it points
+ * at may be perfectly valid.
+ */
+const visible = links.filter((link) => isDiscoverable(link.path));
+
+/** Group preserving authored order within each relationship type. */
+const grouped = groupByType
+  ? visible.reduce<Map<RelationshipType, RelatedLink[]>>((acc, link) => {
+      const bucket = acc.get(link.type) ?? [];
+      bucket.push(link);
+      acc.set(link.type, bucket);
+      return acc;
+    }, new Map())
+  : undefined;
+---
+
+<nav class="axf-related" aria-labelledby={headingId}>
+  <Heading id={headingId} class="axf-section-heading">{heading}</Heading>
+
+  {
+    visible.length === 0 ? (
+      <p class="axf-related-empty">{emptyStatement}</p>
+    ) : grouped ? (
+      [...grouped.entries()].map(([type, group]) => (
+        <div class="axf-related-group">
+          <h3 class="axf-related-group-label">{RELATIONSHIP_LABELS[type]}</h3>
+          <ul class="axf-related-list">
+            {group.map((link) => (
+              <li class="axf-related-item">
+                <a class="axf-related-link" href={url(link.path)}>{link.title}</a>
+                {link.rationale && (
+                  <p class="axf-related-rationale">{link.rationale}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    ) : (
+      <ul class="axf-related-list">
+        {visible.map((link) => (
+          <li class="axf-related-item">
+            {/*
+              The relationship type is stated per item so the reader knows WHY
+              this link is here, not merely that it exists.
+            */}
+            <span class="axf-related-type">{RELATIONSHIP_LABELS[link.type]}</span>
+            <a class="axf-related-link" href={url(link.path)}>{link.title}</a>
+            {link.rationale && (
+              <p class="axf-related-rationale">{link.rationale}</p>
+            )}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</nav>

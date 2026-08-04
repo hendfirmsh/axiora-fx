@@ -1,0 +1,23 @@
+---
+/**
+ * Market Intelligence index.
+ *
+ * Authority: 06_Page_Inventory.md:11, 05_Sitemap.md:37.
+ *
+ * Group 2 replaces this with the paginated brief index. Brief detail routes are
+ * generated from the corpus, so they do not exist until records are published.
+ */
+
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES } from '../../lib/routes.ts';
+---
+
+<PendingRoutePage
+  path={ROUTES.marketIntelligence.path}
+  title={ROUTES.marketIntelligence.title}
+  description={ROUTES.marketIntelligence.description}
+  breadcrumbs={[
+    { label: 'AXIORA', path: ROUTES.home.path },
+    { label: ROUTES.marketIntelligence.title },
+  ]}
+/>

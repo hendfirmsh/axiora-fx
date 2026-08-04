@@ -1,0 +1,243 @@
+/*
+ * AXIORA interim design tokens.
+ *
+ * Authority: 02.5_Visual_Identity/13_Design_Tokens.md (three-layer taxonomy),
+ *            04_Workspace_Architecture/15_Workspace_Blueprint.md:18-23 (interim identity policy),
+ *            IMPLEMENTATION_CONTRACT.md Section 5 (design constraints).
+ *
+ * BINDING INTERIM POLICY — READ BEFORE CHANGING ANY VALUE
+ *
+ * NO VALUE IN THIS FILE IS AN APPROVED VISUAL IDENTITY DECISION.
+ *
+ *   - No brand colour is introduced. The palette is deliberately neutral
+ *     greyscale so it cannot be mistaken for an approved AXIORA colour.
+ *   - No typeface is selected. A system font stack is used for readability
+ *     and to protect the transfer budget.
+ *   - No invented logo, symbol, gradient, or decorative visual language.
+ *   - Financial direction does NOT reuse generic success/error colour meaning.
+ *
+ * Every value here is temporary and replaceable without changing content
+ * semantics or layout contracts. Replacing these values is a Visual Identity
+ * decision and follows IMPLEMENTATION_CONTRACT.md Section 10.
+ *
+ * Layer 1 Foundation -> raw scales, no meaning
+ * Layer 2 Semantic   -> role-based, references Foundation only
+ * Layer 3 Component  -> component-scoped, references Semantic only
+ */
+
+:root {
+  /* ---------------------------------------------------------------------
+   * LAYER 1 — FOUNDATION (raw scales, carry no meaning)
+   * ------------------------------------------------------------------ */
+
+  /* Dark financial workspace palette. */
+  --axf-neutral-0: #f7f6f2;
+  --axf-neutral-50: #ebe9e3;
+  --axf-neutral-100: #d9d6ce;
+  --axf-neutral-200: #b9b5aa;
+  --axf-neutral-300: #918d84;
+  --axf-neutral-400: #6f6c65;
+  --axf-neutral-500: #52514c;
+  --axf-neutral-600: #3c3c38;
+  --axf-neutral-700: #292a27;
+  --axf-neutral-800: #1d1e1c;
+  --axf-neutral-900: #141513;
+  --axf-neutral-950: #0d0e0c;
+  --axf-gold-300: #e5c981;
+  --axf-gold-400: #cbaa5d;
+  --axf-gold-500: #9f7e39;
+  --axf-green-400: #7fc3a1;
+  --axf-red-400: #dd8d83;
+
+  /* Type scale. Interim, readability-driven. */
+  --axf-font-size-xs: 0.8125rem;
+  --axf-font-size-sm: 0.9062rem;
+  --axf-font-size-base: 1rem;
+  --axf-font-size-md: 1.0625rem;
+  --axf-font-size-lg: 1.25rem;
+  --axf-font-size-xl: 1.5rem;
+  --axf-font-size-2xl: 1.875rem;
+  --axf-font-size-3xl: 2.5rem;
+  --axf-font-size-4xl: clamp(2.75rem, 7vw, 5.75rem);
+
+  --axf-line-height-tight: 1.25;
+  --axf-line-height-snug: 1.4;
+  --axf-line-height-normal: 1.6;
+  --axf-line-height-relaxed: 1.75;
+
+  --axf-font-weight-regular: 400;
+  --axf-font-weight-medium: 500;
+  --axf-font-weight-semibold: 600;
+
+  /*
+   * Font stacks. NO TYPEFACE IS SELECTED. System stacks only.
+   * No web font is downloaded, which also protects the transfer budget.
+   */
+  --axf-font-family-system: ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --axf-font-family-reading: ui-serif, Georgia, Cambria, 'Times New Roman', serif;
+  --axf-font-family-mono: ui-monospace, SFMono-Regular, 'Cascadia Mono', Consolas,
+    'Liberation Mono', monospace;
+
+  /* Spacing scale (4px base). */
+  --axf-space-0: 0;
+  --axf-space-1: 0.25rem;
+  --axf-space-2: 0.5rem;
+  --axf-space-3: 0.75rem;
+  --axf-space-4: 1rem;
+  --axf-space-5: 1.25rem;
+  --axf-space-6: 1.5rem;
+  --axf-space-8: 2rem;
+  --axf-space-10: 2.5rem;
+  --axf-space-12: 3rem;
+  --axf-space-16: 4rem;
+  --axf-space-20: 5rem;
+
+  /* Radii and borders. Restrained; no decorative treatment. */
+  --axf-radius-sm: 4px;
+  --axf-radius-md: 8px;
+  --axf-radius-lg: 14px;
+  --axf-radius-xl: 20px;
+  --axf-border-width: 1px;
+  --axf-border-width-thick: 2px;
+
+  /* Layout measures. */
+  --axf-measure-reading: 68ch;
+  --axf-measure-supporting: 90ch;
+  --axf-sidebar-width: 15.5rem;
+  --axf-header-height: 4rem;
+  --axf-workspace-max: 112rem;
+
+  /*
+   * Touch target minimums — decision K-18. BINDING.
+   * Minimum hit area 44x44 CSS px; minimum 8px separation where a target
+   * cannot be enlarged.
+   */
+  --axf-touch-target-min: 44px;
+  --axf-touch-target-gap: 8px;
+
+  /* Focus ring. Never colour alone; width carries the signal. */
+  --axf-focus-ring-width: 3px;
+  --axf-focus-ring-offset: 2px;
+
+  /* Motion. Reduced motion is a first-class mode, not a degraded variant. */
+  --axf-duration-instant: 0ms;
+  --axf-duration-fast: 120ms;
+  --axf-duration-medium: 200ms;
+  --axf-easing-standard: cubic-bezier(0.2, 0, 0.38, 0.9);
+
+  --axf-z-header: 100;
+  --axf-z-drawer: 200;
+  --axf-z-skip-link: 300;
+
+  /* ---------------------------------------------------------------------
+   * LAYER 2 — SEMANTIC (role-based; references Foundation only)
+   * ------------------------------------------------------------------ */
+
+  --axf-color-surface: var(--axf-neutral-950);
+  --axf-color-surface-subtle: var(--axf-neutral-900);
+  --axf-color-surface-sunken: var(--axf-neutral-800);
+  --axf-color-surface-raised: var(--axf-neutral-700);
+
+  --axf-color-text-primary: var(--axf-neutral-0);
+  --axf-color-text-secondary: var(--axf-neutral-200);
+  --axf-color-text-tertiary: var(--axf-neutral-300);
+  --axf-color-text-inverse: var(--axf-neutral-950);
+
+  --axf-color-border: var(--axf-neutral-700);
+  --axf-color-border-strong: var(--axf-neutral-500);
+
+  --axf-color-link: var(--axf-gold-300);
+  --axf-color-link-visited: var(--axf-gold-400);
+  --axf-color-focus: var(--axf-gold-300);
+  --axf-color-accent: var(--axf-gold-300);
+  --axf-color-accent-muted: var(--axf-gold-500);
+  --axf-color-positive: var(--axf-green-400);
+  --axf-color-negative: var(--axf-red-400);
+
+  /*
+   * Content-state roles. Text label always carries the meaning; colour is
+   * supplementary only, per 13_Accessibility_Workspace.md.
+   */
+  --axf-color-state-current: var(--axf-gold-300);
+  --axf-color-state-attention: var(--axf-red-400);
+  --axf-color-state-historical: var(--axf-neutral-300);
+
+  --axf-font-family-ui: var(--axf-font-family-system);
+  --axf-font-family-prose: var(--axf-font-family-system);
+
+  /* ---------------------------------------------------------------------
+   * LAYER 3 — COMPONENT (component-scoped; references Semantic only)
+   * ------------------------------------------------------------------ */
+
+  --axf-sidebar-bg: var(--axf-color-surface-subtle);
+  --axf-sidebar-border: var(--axf-color-border);
+  --axf-sidebar-item-active-bg: var(--axf-color-surface-sunken);
+  --axf-sidebar-collapsed-width: 4.5rem;
+  --axf-sidebar-padding: var(--axf-space-3);
+  --axf-sidebar-content-padding: var(--axf-space-2);
+  --axf-sidebar-section-gap: var(--axf-space-8);
+  --axf-sidebar-item-gap: var(--axf-space-2);
+  --axf-sidebar-item-height: var(--axf-touch-target-min);
+  --axf-sidebar-icon-size: var(--axf-space-5);
+  --axf-sidebar-radius: var(--axf-radius-md);
+  --axf-sidebar-control-gap: var(--axf-space-2);
+  --axf-sidebar-type-section: var(--axf-font-size-xs);
+  --axf-sidebar-type-label: var(--axf-font-size-sm);
+  --axf-sidebar-type-caption: var(--axf-font-size-xs);
+  --axf-sidebar-tracking-brand: 0.12em;
+  --axf-sidebar-tracking-section: 0.1em;
+  --axf-sidebar-tracking-control: 0.08em;
+  --axf-sidebar-tracking-meta: 0.06em;
+
+  --axf-header-bg: var(--axf-color-surface);
+  --axf-header-border: var(--axf-color-border);
+
+  --axf-evidence-border: var(--axf-color-border-strong);
+  --axf-source-bg: var(--axf-color-surface-subtle);
+  --axf-correction-border: var(--axf-color-state-attention);
+  --axf-badge-border: var(--axf-color-border-strong);
+  --axf-footer-bg: var(--axf-color-surface-subtle);
+}
+
+:root[data-theme='light'] {
+  --axf-color-surface: var(--axf-neutral-0);
+  --axf-color-surface-subtle: var(--axf-neutral-50);
+  --axf-color-surface-sunken: #e2dfd7;
+  --axf-color-surface-raised: #ffffff;
+  --axf-color-text-primary: var(--axf-neutral-950);
+  --axf-color-text-secondary: #45443f;
+  --axf-color-text-tertiary: #6f6c65;
+  --axf-color-text-inverse: var(--axf-neutral-0);
+  --axf-color-border: #c9c6bd;
+  --axf-color-border-strong: var(--axf-neutral-500);
+  --axf-color-link: #80621f;
+  --axf-color-link-visited: #6f531b;
+  --axf-color-focus: #80621f;
+  --axf-color-accent: #80621f;
+  --axf-color-accent-muted: var(--axf-gold-500);
+  --axf-color-positive: #26734d;
+  --axf-color-negative: #a33f36;
+  --axf-color-state-current: #80621f;
+  --axf-color-state-attention: #a33f36;
+  --axf-color-state-historical: #6f6c65;
+}
+
+/*
+ * Reduced motion is a first-class mode (03_Experience_Architecture/05_Motion_Experience.md).
+ * Comprehension never depends on animation.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --axf-duration-fast: var(--axf-duration-instant);
+    --axf-duration-medium: var(--axf-duration-instant);
+  }
+}
+
+/* Honour forced-colors / high-contrast modes rather than overriding them. */
+@media (forced-colors: active) {
+  :root {
+    --axf-color-border: CanvasText;
+    --axf-color-border-strong: CanvasText;
+  }
+}

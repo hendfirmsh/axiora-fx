@@ -1,0 +1,22 @@
+---
+/**
+ * Legal & Risk.
+ *
+ * Authority: 06_Page_Inventory.md:19, 05_Sitemap.md:45.
+ *
+ * Eight regions required (privacy, terms, general risk disclosure, limitations,
+ * editorial disclosure, commercial disclosure, contact route, effective date +
+ * revision state). All must be Approved before production release. Group 8
+ * replaces this page.
+ */
+
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES } from '../../lib/routes.ts';
+---
+
+<PendingRoutePage
+  path={ROUTES.legal.path}
+  title={ROUTES.legal.title}
+  description={ROUTES.legal.description}
+  breadcrumbs={[{ label: 'AXIORA', path: ROUTES.home.path }, { label: ROUTES.legal.title }]}
+/>

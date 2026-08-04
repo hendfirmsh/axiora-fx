@@ -1,0 +1,52 @@
+---
+export type IconName =
+  | 'activity'
+  | 'book'
+  | 'briefcase'
+  | 'chevron'
+  | 'correction'
+  | 'economy'
+  | 'feedback'
+  | 'glossary'
+  | 'inflation'
+  | 'keyboard'
+  | 'methodology'
+  | 'moon'
+  | 'news'
+  | 'oil'
+  | 'search'
+  | 'settings'
+  | 'signout'
+  | 'support';
+
+interface Props {
+  name: IconName;
+  class?: string;
+}
+
+const { name, class: className } = Astro.props;
+const paths: Record<IconName, string[]> = {
+  activity: ['M4 12h3l2-6 4 12 2-6h5'],
+  book: ['M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z', 'M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z'],
+  briefcase: ['M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2', 'M3 7h18v12H3z', 'M3 12h18'],
+  chevron: ['m9 18 6-6-6-6'],
+  correction: ['M4 4v6h6', 'M20 20v-6h-6', 'M5.1 15a8 8 0 0 0 13.4 2', 'M18.9 9A8 8 0 0 0 5.5 7'],
+  economy: ['M4 19V9', 'M10 19V5', 'M16 19v-7', 'M22 19H2'],
+  feedback: ['M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z'],
+  glossary: ['M5 4h14v16H5z', 'M8 8h8', 'M8 12h6', 'M8 16h4'],
+  inflation: ['M3 17 9 11l4 4 8-9', 'M16 6h5v5'],
+  keyboard: ['M3 6h18v12H3z', 'M7 10h.01', 'M11 10h.01', 'M15 10h.01', 'M7 14h10'],
+  methodology: ['M12 3v18', 'M3 12h18', 'm5 5 14 14', 'm19 5-14 14'],
+  moon: ['M20 15.5A8.5 8.5 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z'],
+  news: ['M4 4h16v16H4z', 'M8 8h8', 'M8 12h8', 'M8 16h5'],
+  oil: ['M12 3s5 6 5 11a5 5 0 0 1-10 0c0-5 5-11 5-11Z'],
+  search: ['m21 21-4.35-4.35', 'M19 11a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z'],
+  settings: ['M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z', 'M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.57V20h-3v-.09a1.7 1.7 0 0 0-1-1.57 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7 14.68a1.7 1.7 0 0 0-1.57-1H5v-3h.09a1.7 1.7 0 0 0 1.57-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.12-2.12.06.06A1.7 1.7 0 0 0 10.32 6a1.7 1.7 0 0 0 1-1.57V4h3v.09a1.7 1.7 0 0 0 1 1.57A1.7 1.7 0 0 0 17.2 5.3l.06-.06 2.12 2.12-.06.06A1.7 1.7 0 0 0 19 9.32a1.7 1.7 0 0 0 1.57 1H21v3h-.09A1.7 1.7 0 0 0 19.4 15Z'],
+  signout: ['M10 5H5v14h5', 'M14 8l4 4-4 4', 'M8 12h10'],
+  support: ['M4 12a8 8 0 0 1 16 0', 'M4 12v5h3v-5H4Z', 'M17 12v5h3v-5h-3Z', 'M17 19h-5'],
+};
+---
+
+<svg class:list={['axf-sidebar-icon', className]} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  {paths[name].map((path) => <path d={path} />)}
+</svg>

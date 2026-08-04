@@ -1,0 +1,111 @@
+---
+/**
+ * Search — labelled input, deterministic static results, no-JS fallback.
+ *
+ * Authority: 10_Component_Inventory.md (Search: idle, query, results, no results,
+ *            unavailable; "labelled input, deterministic submission, no-result
+ *            guidance, fallback browse"),
+ *            02_Application_Shell.md:33 (search placement and constraints),
+ *            11_Interaction_Specification.md:16 (search submit),
+ *            11_Interaction_Specification.md:57 (static-first interaction rule).
+ *
+ * STATIC-FIRST CONSTRAINT
+ *
+ * There is no server. The search form submits to the search route with a `q`
+ * query parameter. The search page reads that parameter from the URL and filters
+ * the static index. Without JavaScript the form still submits and the page still
+ * renders — the filtering just happens at the route level rather than in the
+ * browser.
+ *
+ * This component is the ENTRY POINT only: a labelled input and a submit button.
+ * The results rendering lives in the search page itself, which has access to the
+ * full corpus. Separating them means this component can appear in the header
+ * (compact) or on the search page (full) without duplicating the results logic.
+ *
+ * WHAT THIS COMPONENT MUST NOT DO
+ *
+ *   - imply real-time or personalized results (02_Application_Shell.md:33);
+ *   - submit to an external service;
+ *   - require JavaScript to submit;
+ *   - show results inline in the shell (that would cover content, violating the
+ *     sticky-elements rule in Component_Inventory).
+ *
+ * UNAVAILABLE STATE
+ *
+ * When the corpus is empty the search index is also empty. The component still
+ * renders — hiding it would imply the feature does not exist, which is false —
+ * but it announces the state so the reader is not confused by zero results.
+ */
+
+import { ROUTES } from '../lib/routes.ts';
+import { isRouteReady } from '../lib/route-readiness.ts';
+import { url } from '../lib/url.ts';
+
+interface Props {
+  /**
+   * 'header' — compact single-line form for the shell header.
+   * 'page'   — full form with visible label and guidance text for the search page.
+   */
+  variant?: 'header' | 'page';
+  /** Pre-fill the input with an existing query (search page only). */
+  initialQuery?: string;
+}
+
+const { variant = 'header', initialQuery = '' } = Astro.props;
+
+const searchReady = isRouteReady(ROUTES.search.path);
+const inputId = variant === 'page' ? 'axf-search-input-page' : 'axf-search-input-header';
+---
+
+<form
+  class={`axf-search axf-search-${variant}`}
+  action={url(ROUTES.search.path)}
+  method="get"
+  role="search"
+  aria-label="Cari pengetahuan AXIORA"
+>
+  {variant === 'page' && (
+    <label class="axf-search-label" for={inputId}>
+      Cari pengetahuan yang telah dipublikasikan
+    </label>
+  )}
+
+  <div class="axf-search-row">
+    {variant === 'header' && (
+      <label class="axf-visually-hidden" for={inputId}>
+        Cari pengetahuan AXIORA
+      </label>
+    )}
+
+    <input
+      id={inputId}
+      class="axf-search-input"
+      type="search"
+      name="q"
+      value={initialQuery}
+      placeholder="Cari…"
+      autocomplete="off"
+      spellcheck={false}
+      aria-describedby={!searchReady ? 'axf-search-corpus-note' : undefined}
+    />
+
+    <button class="axf-search-submit axf-touch-target" type="submit">
+      Cari
+    </button>
+  </div>
+
+  {!searchReady && (
+    <p id="axf-search-corpus-note" class="axf-search-corpus-note">
+      Belum ada catatan yang dipublikasikan. Pencarian akan mengembalikan hasil
+      kosong sampai korpus tersedia.
+    </p>
+  )}
+
+  {variant === 'page' && (
+    <p class="axf-search-guidance">
+      Pencarian mencakup judul, ringkasan, topik, dan jenis konten dari catatan
+      yang telah dipublikasikan. Tidak ada pencarian real-time atau hasil yang
+      dipersonalisasi.
+    </p>
+  )}
+</form>

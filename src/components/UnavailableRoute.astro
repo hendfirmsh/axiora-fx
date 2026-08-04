@@ -1,0 +1,109 @@
+---
+/**
+ * UnavailableRoute — content-readiness state for an approved MVP route.
+ *
+ * Authority: 04_Workspace_Architecture/09_Reading_Flows.md:45 (Unavailable),
+ *            04_Workspace_Architecture/04_Knowledge_Navigation.md:66,
+ *            06_Page_Inventory.md:19 ("unavailable legal state blocks release
+ *            rather than silently disappearing"),
+ *            06_Page_Inventory.md:22 ("no fake article"),
+ *            14_Implementation_Acceptance_Criteria.md:84.
+ *
+ * This is NOT a 404 and NOT a feature announcement.
+ *
+ * The route is approved and exists. What is missing is approved CONTENT. The page
+ * therefore states that fact plainly and hands the reader real routes that exist.
+ *
+ * WHAT THIS COMPONENT MUST NEVER DO
+ *
+ *   - render a dummy or sample article, or any prose that could be mistaken for
+ *     published knowledge (06_Page_Inventory.md:22);
+ *   - claim the page is active, or promise a release date;
+ *   - present itself as a product capability or a new feature;
+ *   - leave the reader without a route onward
+ *     (04_Knowledge_Navigation.md:67 requires home/topics/search/footer to survive
+ *     a navigation failure).
+ *
+ * The caller is responsible for passing indexable={false} on the layout. That is
+ * asserted at build time rather than trusted: scripts/verify-static.mjs checks
+ * that every page carrying this component also carries a noindex directive, so a
+ * forgotten prop fails the build instead of publishing an empty page.
+ *
+ * The distinction between a development state and a released page is carried by
+ * MARKUP, not only by wording: the data-axf-readiness attribute below is what the
+ * verifier and the production gate key on.
+ */
+
+import { RECOVERY_ROUTES } from '../lib/route-readiness.ts';
+import { showDevelopmentMarkers } from '../lib/env.ts';
+import { url } from '../lib/url.ts';
+
+interface Props {
+  /** The route's own title, so the reader knows which page reached this state. */
+  title: string;
+  /**
+   * Why no approved content exists yet. Comes from the readiness registry, so the
+   * reader-facing text and the production gate's diagnostic are the same string.
+   */
+  reason: string;
+}
+
+const { title, reason } = Astro.props;
+
+// Development-only. Must not render in a production release build; the wording
+// above already carries the reader-facing meaning without it.
+const showMarker = showDevelopmentMarkers();
+---
+
+{/*
+  data-axf-readiness is a build-verification hook, not styling. verify-static.mjs
+  requires a matching noindex on any page that emits it.
+*/}
+<section class="axf-unavailable" data-axf-readiness="unavailable" aria-labelledby="axf-unavailable-heading">
+  <h1 id="axf-unavailable-heading" class="axf-unavailable-title">{title}</h1>
+
+  <p class="axf-unavailable-statement">
+    <strong>Konten belum tersedia untuk publikasi.</strong>
+  </p>
+
+  <p class="axf-unavailable-reason">{reason}</p>
+
+  {/*
+    Stating the boundary explicitly. Without this, an empty page invites the
+    reader to assume the content exists but failed to load.
+  */}
+  <p class="axf-unavailable-boundary">
+    Halaman ini bukan halaman yang hilang atau rusak. Rutenya sudah disetujui,
+    tetapi AXIORA tidak menayangkan catatan yang belum melewati tinjauan
+    editorial. Tidak ada contoh, ringkasan sementara, atau teks pengganti yang
+    ditampilkan di sini.
+  </p>
+
+  <nav class="axf-unavailable-recovery" aria-label="Jalur yang tersedia sekarang">
+    <h2 class="axf-unavailable-recovery-heading">Lanjutkan ke</h2>
+    <ul class="axf-unavailable-recovery-list">
+      {
+        RECOVERY_ROUTES.map((route) => (
+          <li>
+            <a class="axf-nav-link" href={url(route.path)}>
+              {route.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+
+  {
+    showMarker && (
+      <p class="axf-development-marker" data-axf-development-marker>
+        <span class="axf-development-marker-label">Status build pengembangan</span>
+        Penanda ini hanya muncul pada build pengembangan. Rute ini terdaftar
+        sebagai <code>unavailable</code> pada registri kesiapan konten, diberi
+        <code>noindex</code>, serta dikecualikan dari sitemap, indeks pencarian,
+        Brief Hari Ini, konten terkait, dan Learn Next. Build produksi akan gagal
+        selama rute ini belum memiliki konten yang disetujui.
+      </p>
+    )
+  }
+</section>

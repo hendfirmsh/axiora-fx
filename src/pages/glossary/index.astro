@@ -1,0 +1,20 @@
+---
+/**
+ * Glossary index.
+ *
+ * Authority: 06_Page_Inventory.md:16 ("Required as corpus needs"),
+ *            05_Sitemap.md:42.
+ *
+ * Group 5 replaces this page. Entry routes are corpus-generated.
+ */
+
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES } from '../../lib/routes.ts';
+---
+
+<PendingRoutePage
+  path={ROUTES.glossary.path}
+  title={ROUTES.glossary.title}
+  description={ROUTES.glossary.description}
+  breadcrumbs={[{ label: 'AXIORA', path: ROUTES.home.path }, { label: ROUTES.glossary.title }]}
+/>

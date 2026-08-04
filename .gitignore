@@ -1,0 +1,25 @@
+# Build output
+dist/
+.astro/
+.firebase/
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS / editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+
+# Verification scratch (throwaway records for the compatibility gate)
+src/content/**/__gate-*.mdx
