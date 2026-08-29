@@ -93,6 +93,13 @@ export const ROUTES = {
     description: 'Cari pengetahuan AXIORA yang telah dipublikasikan.',
     indexable: true,
   },
+  calendar: {
+    path: '/calendar/',
+    title: 'Calendar',
+    description:
+      'Kalender rilis ekonomi makro: waktu, wilayah, dampak, dan angka konsensus serta sebelumnya.',
+    indexable: false,
+  },
   console: {
     path: '/console/',
     title: 'Console',
@@ -131,7 +138,7 @@ export function topicPath(topic: (typeof TOPICS)[number]): string {
 export interface NavItem {
   label: string;
   path: string;
-  icon: 'book' | 'correction' | 'economy' | 'glossary' | 'inflation' | 'methodology' | 'news' | 'oil';
+  icon: 'book' | 'calendar' | 'correction' | 'economy' | 'glossary' | 'inflation' | 'methodology' | 'news' | 'oil';
   /** Match the route exactly rather than by prefix. */
   exact?: boolean;
   /** Visually grouped below the primary scan path without removing the route. */
@@ -153,9 +160,10 @@ export interface NavGroup {
 export const NAVIGATION: NavGroup[] = [
   {
     label: 'Market',
-    items: [
-      { label: 'News', path: ROUTES.todaysBrief.path, icon: 'news' },
-      { label: 'Oil', path: topicPath('oil'), icon: 'oil' },
+     items: [
+       { label: 'News', path: ROUTES.todaysBrief.path, icon: 'news' },
+       { label: 'Calendar', path: ROUTES.calendar.path, icon: 'calendar' },
+       { label: 'Oil', path: topicPath('oil'), icon: 'oil' },
       { label: 'Inflation', path: topicPath('inflation'), icon: 'inflation' },
       { label: 'Economy', path: topicPath('economy'), icon: 'economy' },
       { label: 'Market overview', path: ROUTES.marketIntelligence.path, icon: 'news', exact: true, secondary: true },

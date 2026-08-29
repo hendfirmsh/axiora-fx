@@ -1,0 +1,415 @@
+---
+/**
+ * Market Calendar page.
+ *
+ * Authority: user instruction (AXIORA Market Calendar feature, 2026-08-29),
+ *            04_Workspace_Architecture/09_Reading_Flows.md (Unavailable state).
+ *
+ * DUAL BEHAVIOUR (intentional, not a bug):
+ *
+ *   - Development build (AXIORA_ENV unset or 'development'): render the full
+ *     calendar interface populated with DEVELOPMENT-ONLY illustrative data, with a
+ *     prominent banner stating the data is not real. This lets the interface be
+ *     built, reviewed, and tested without any fabricated production data.
+ *
+ *   - Production build: the interface must never ship fabricated economic data,
+ *     so we render the standard unavailable-route placeholder instead. PendingRoutePage
+ *     throws under a production build, which is the correct release-gate failure.
+ *
+ * This satisfies the hard constraint: no fabricated production economic data, and
+ * the development sample is clearly separated and labelled.
+ */
+
+import WorkspaceLayout from '../../layouts/WorkspaceLayout.astro';
+import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
+import { ROUTES } from '../../lib/routes.ts';
+import { showDevelopmentMarkers } from '../../lib/env.ts';
+import { asset } from '../../lib/url.ts';
+import {
+  getCalendarEvents,
+  groupByDate,
+  currenciesIn,
+  datesIn,
+  longDateLabel,
+  IMPACT_LABELS,
+  DEV_NOTICE,
+} from '../../lib/calendar.ts';
+
+const devBuild = showDevelopmentMarkers();
+
+const events = getCalendarEvents();
+const groups = groupByDate(events);
+const currencies = currenciesIn(events);
+const dates = datesIn(events);
+---
+
+{
+  devBuild ? (
+    <WorkspaceLayout
+      title={ROUTES.calendar.title}
+      description={ROUTES.calendar.description}
+      breadcrumbs={[
+        { label: 'AXIORA', path: ROUTES.home.path },
+        { label: ROUTES.calendar.title },
+      ]}
+      indexable={false}
+    >
+      <section class="axf-calendar" aria-labelledby="axf-calendar-heading">
+        <header class="axf-calendar-intro">
+          <p class="axf-eyebrow">Market</p>
+          <h1 id="axf-calendar-heading">Calendar</h1>
+          <p class="axf-calendar-lede">
+            Kalender rilis ekonomi makro. Saring berdasarkan hari, mata uang, dan
+            tingkat dampak. Waktu ditampilkan dalam WIB.
+          </p>
+        </header>
+
+        <p class="axf-calendar-notice" role="note">
+          <strong>Data pengembangan.</strong> {DEV_NOTICE}
+        </p>
+
+        <form class="axf-calendar-filters" data-calendar-filters>
+          <div class="axf-field">
+            <label for="cal-filter-date">Hari</label>
+            <select id="cal-filter-date" data-filter="date">
+              <option value="all">Semua hari</option>
+              {dates.map((d) => <option value={d}>{longDateLabel(d)}</option>)}
+            </select>
+          </div>
+          <div class="axf-field">
+            <label for="cal-filter-currency">Mata uang</label>
+            <select id="cal-filter-currency" data-filter="currency">
+              <option value="all">Semua mata uang</option>
+              {currencies.map((c) => <option value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div class="axf-field">
+            <label for="cal-filter-impact">Dampak</label>
+            <select id="cal-filter-impact" data-filter="impact">
+              <option value="all">Semua dampak</option>
+              <option value="high">{IMPACT_LABELS.high}</option>
+              <option value="medium">{IMPACT_LABELS.medium}</option>
+              <option value="low">{IMPACT_LABELS.low}</option>
+            </select>
+          </div>
+        </form>
+
+        <p class="axf-calendar-empty" data-calendar-empty hidden>
+          Tidak ada rilis yang cocok dengan saringan yang dipilih.
+        </p>
+
+        <div class="axf-calendar-tables">
+          {
+            groups.map((group) => (
+              <table
+                class="axf-calendar-table"
+                data-calendar-table
+                data-date={group.date}
+              >
+                <caption>{longDateLabel(group.date)}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Waktu</th>
+                    <th scope="col">Negara</th>
+                    <th scope="col">Dampak</th>
+                    <th scope="col">Indikator</th>
+                    <th scope="col">Sebelumnya</th>
+                    <th scope="col">Konsensus</th>
+                    <th scope="col">Aktual</th>
+                  </tr>
+                </thead>
+                {group.events.map((event) => (
+                  <tbody
+                    class="axf-calendar-event"
+                    data-calendar-event
+                    data-currency={event.currency}
+                    data-impact={event.impact}
+                  >
+                    <tr class="axf-calendar-row">
+                      <td data-label="Waktu">
+                        <span class="axf-cal-time">{event.time}</span>
+                        <span class="axf-cal-tz">{event.timezone}</span>
+                      </td>
+                      <td data-label="Negara">
+                        <span class="axf-cal-country">{event.country}</span>
+                        <span class="axf-cal-currency">{event.currency}</span>
+                      </td>
+                      <td data-label="Dampak">
+                        <span class={`axf-impact axf-impact-${event.impact}`}>
+                          {IMPACT_LABELS[event.impact]}
+                        </span>
+                      </td>
+                      <td data-label="Indikator">
+                        <details class="axf-cal-details">
+                          <summary>{event.title}</summary>
+                          {event.note && <p class="axf-cal-note">{event.note}</p>}
+                          {!event.note && (
+                            <p class="axf-cal-note">
+                              Data pengembangan — bukan rilis sesungguhnya.
+                            </p>
+                          )}
+                        </details>
+                      </td>
+                      <td data-label="Sebelumnya">{event.previous ?? '—'}</td>
+                      <td data-label="Konsensus">{event.forecast ?? '—'}</td>
+                      <td data-label="Aktual">{event.actual ?? '—'}</td>
+                    </tr>
+                  </tbody>
+                ))}
+              </table>
+            ))
+          }
+        </div>
+      </section>
+
+      <script is:inline defer src={asset('/scripts/calendar.js')}></script>
+    </WorkspaceLayout>
+  ) : (
+    <PendingRoutePage
+      path={ROUTES.calendar.path}
+      title={ROUTES.calendar.title}
+      description={ROUTES.calendar.description}
+      breadcrumbs={[
+        { label: 'AXIORA', path: ROUTES.home.path },
+        { label: ROUTES.calendar.title },
+      ]}
+    />
+  )
+}
+
+<style>
+  .axf-calendar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--axf-space-6);
+    max-width: var(--axf-measure-supporting);
+  }
+
+  .axf-calendar-intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--axf-space-2);
+  }
+
+  .axf-eyebrow {
+    margin: 0;
+    font-size: var(--axf-font-size-xs);
+    letter-spacing: var(--axf-sidebar-tracking-section);
+    text-transform: uppercase;
+    color: var(--axf-color-text-tertiary);
+  }
+
+  .axf-calendar-intro h1 {
+    margin: 0;
+    font-size: var(--axf-font-size-2xl);
+    line-height: var(--axf-line-height-tight);
+    color: var(--axf-color-text-primary);
+  }
+
+  .axf-calendar-lede {
+    margin: 0;
+    max-width: var(--axf-measure-reading);
+    color: var(--axf-color-text-secondary);
+  }
+
+  .axf-calendar-notice {
+    margin: 0;
+    padding: var(--axf-space-3) var(--axf-space-4);
+    border: var(--axf-border-width) solid var(--axf-color-state-attention);
+    border-radius: var(--axf-radius-md);
+    background: var(--axf-color-surface-subtle);
+    color: var(--axf-color-text-secondary);
+    font-size: var(--axf-font-size-sm);
+  }
+
+  .axf-calendar-notice strong {
+    color: var(--axf-color-text-primary);
+  }
+
+  .axf-calendar-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--axf-space-4);
+  }
+
+  .axf-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--axf-space-1);
+    min-width: 12rem;
+  }
+
+  .axf-field label {
+    font-size: var(--axf-font-size-xs);
+    letter-spacing: var(--axf-sidebar-tracking-control);
+    text-transform: uppercase;
+    color: var(--axf-color-text-tertiary);
+  }
+
+  .axf-field select {
+    min-height: var(--axf-touch-target-min);
+    padding: var(--axf-space-2) var(--axf-space-3);
+    background: var(--axf-color-surface-subtle);
+    color: var(--axf-color-text-primary);
+    border: var(--axf-border-width) solid var(--axf-color-border);
+    border-radius: var(--axf-radius-sm);
+    font: inherit;
+  }
+
+  .axf-field select:focus-visible {
+    outline: var(--axf-focus-ring-width) solid var(--axf-color-focus);
+    outline-offset: var(--axf-focus-ring-offset);
+  }
+
+  .axf-calendar-empty {
+    margin: 0;
+    color: var(--axf-color-text-tertiary);
+  }
+
+  .axf-calendar-tables {
+    display: flex;
+    flex-direction: column;
+    gap: var(--axf-space-8);
+  }
+
+  .axf-calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--axf-font-size-sm);
+  }
+
+  .axf-calendar-table caption {
+    text-align: left;
+    padding: var(--axf-space-2) 0;
+    font-weight: var(--axf-font-weight-semibold);
+    color: var(--axf-color-text-primary);
+    border-bottom: var(--axf-border-width-thick) solid var(--axf-color-border-strong);
+  }
+
+  .axf-calendar-table th {
+    text-align: left;
+    padding: var(--axf-space-3) var(--axf-space-3);
+    font-size: var(--axf-font-size-xs);
+    letter-spacing: var(--axf-sidebar-tracking-control);
+    text-transform: uppercase;
+    color: var(--axf-color-text-tertiary);
+    border-bottom: var(--axf-border-width) solid var(--axf-color-border);
+  }
+
+  .axf-calendar-row td {
+    padding: var(--axf-space-3);
+    vertical-align: top;
+    border-bottom: var(--axf-border-width) solid var(--axf-color-border);
+    color: var(--axf-color-text-secondary);
+  }
+
+  .axf-cal-time {
+    display: block;
+    color: var(--axf-color-text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .axf-cal-tz {
+    display: block;
+    font-size: var(--axf-font-size-xs);
+    color: var(--axf-color-text-tertiary);
+  }
+
+  .axf-cal-country {
+    display: block;
+    color: var(--axf-color-text-primary);
+  }
+
+  .axf-cal-currency {
+    display: block;
+    font-size: var(--axf-font-size-xs);
+    color: var(--axf-color-text-tertiary);
+  }
+
+  .axf-impact {
+    display: inline-block;
+    padding: var(--axf-space-1) var(--axf-space-2);
+    border-radius: var(--axf-radius-sm);
+    border: var(--axf-border-width) solid var(--axf-color-border-strong);
+    font-size: var(--axf-font-size-xs);
+    color: var(--axf-color-text-secondary);
+  }
+
+  /* Impact is communicated by the text label first; weight carries the signal. */
+  .axf-impact-high {
+    font-weight: var(--axf-font-weight-semibold);
+    color: var(--axf-color-text-primary);
+    border-color: var(--axf-color-border-strong);
+  }
+
+  .axf-impact-medium {
+    font-weight: var(--axf-font-weight-medium);
+  }
+
+  .axf-impact-low {
+    font-weight: var(--axf-font-weight-regular);
+    color: var(--axf-color-text-tertiary);
+  }
+
+  .axf-cal-details summary {
+    cursor: pointer;
+    color: var(--axf-color-text-primary);
+    list-style: none;
+  }
+
+  .axf-cal-details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .axf-cal-details summary:focus-visible {
+    outline: var(--axf-focus-ring-width) solid var(--axf-color-focus);
+    outline-offset: var(--axf-focus-ring-offset);
+  }
+
+  .axf-cal-note {
+    margin: var(--axf-space-2) 0 0;
+    font-size: var(--axf-font-size-xs);
+    color: var(--axf-color-text-tertiary);
+  }
+
+  /* Responsive: table becomes stacked cards on narrow viewports. */
+  @media (max-width: 42rem) {
+    .axf-calendar-table thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .axf-calendar-event,
+    .axf-calendar-row {
+      display: block;
+    }
+
+    .axf-calendar-row td {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--axf-space-4);
+      padding: var(--axf-space-2) 0;
+      border-bottom: none;
+    }
+
+    .axf-calendar-row td::before {
+      content: attr(data-label);
+      flex: 0 0 40%;
+      font-size: var(--axf-font-size-xs);
+      text-transform: uppercase;
+      letter-spacing: var(--axf-sidebar-tracking-control);
+      color: var(--axf-color-text-tertiary);
+    }
+
+    .axf-calendar-event {
+      border: var(--axf-border-width) solid var(--axf-color-border);
+      border-radius: var(--axf-radius-md);
+      padding: var(--axf-space-3);
+      margin-bottom: var(--axf-space-4);
+    }
+  }
+</style>

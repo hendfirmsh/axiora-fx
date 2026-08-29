@@ -132,6 +132,11 @@ const READINESS: Record<string, ReadinessRecord> = {
     reason:
       'Pencarian bekerja atas korpus statis yang telah dipublikasikan. Karena belum ada catatan yang dipublikasikan, indeks pencarian masih kosong.',
   },
+  [ROUTES.calendar.path]: {
+    state: 'unavailable',
+    reason:
+      'Antarmuka kalender rilis ekonomi sudah dibangun, tetapi sumber data sesungguhnya belum terhubung dan data yang ditampilkan masih contoh pengembangan. Halaman ini hanya menampilkan data contoh dalam build pengembangan, bukan data produksi.',
+  },
 
   // --- Future-gated: reserved, NOT an MVP route ------------------------
   //

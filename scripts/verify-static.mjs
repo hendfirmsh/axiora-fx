@@ -53,6 +53,7 @@ const APPROVED_SCRIPTS = [
   'sidebar-group',
   'account-menu',
   'search-filter',
+  'calendar',
   // Firebase Auth is isolated to the explicitly approved private Console route.
   'ConsoleApp.astro_astro_type_script',
 ];
