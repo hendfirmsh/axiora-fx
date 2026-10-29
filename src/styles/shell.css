@@ -305,7 +305,17 @@
     position: sticky;
     inset-block-start: var(--axf-header-height);
     block-size: calc(100dvh - var(--axf-header-height));
-    overflow: hidden;
+    /*
+     * NOT `overflow: hidden`.
+     *
+     * The account menu is absolutely positioned inside the sidebar footer and
+     * intentionally extends past the sidebar's right edge (and above its top
+     * on short viewports). Clipping here cut the panel in half and hid it
+     * entirely in the collapsed rail. The parts that must be clipped while the
+     * rail animates (brand, search control, scrolling navigation) own their
+     * own overflow instead.
+     */
+    overflow: visible;
   }
 
   .axf-drawer {

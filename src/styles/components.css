@@ -118,6 +118,13 @@
   align-items: center;
   gap: var(--axf-space-2);
   padding-inline: var(--axf-sidebar-content-padding);
+  /*
+   * The rail animates its width, so the wordmark can outrun the sidebar for a
+   * few frames while expanding. Clip that transient overflow, but leave a
+   * 5px margin so the toggle's focus ring (2.4px + 1.6px offset) survives.
+   */
+  overflow: clip;
+  overflow-clip-margin: 5px;
 }
 
 .axf-sidebar-logo {
@@ -172,6 +179,9 @@
 .axf-sidebar-search-region {
   flex: 0 0 auto;
   margin-block-start: var(--axf-space-6);
+  /* Same rail-animation clip as the brand; the search focus ring stays whole. */
+  overflow: clip;
+  overflow-clip-margin: 5px;
 }
 
 .axf-sidebar-search {
@@ -219,6 +229,56 @@
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
   padding-inline: var(--axf-sidebar-content-padding);
+}
+
+/*
+ * Sidebar scrollbars.
+ *
+ * Scoped deliberately to the two surfaces that actually scroll inside the
+ * sidebar. A global `*::-webkit-scrollbar` rule would also repaint tables,
+ * code blocks, and the Console's own panels.
+ *
+ * Firefox cannot use the WebKit pseudo-elements, so it gets the standard
+ * properties. They are gated behind a Firefox-only support query because
+ * Chromium honours `scrollbar-color` by DISCARDING the WebKit styling, which
+ * would drop the 6px width and the rounded thumb.
+ */
+@supports (-moz-appearance: none) {
+  .axf-sidebar-navigation,
+  .axf-account-menu {
+    scrollbar-width: thin;
+    scrollbar-color: var(--axf-sidebar-scrollbar-thumb) transparent;
+  }
+}
+
+.axf-sidebar-navigation::-webkit-scrollbar,
+.axf-account-menu::-webkit-scrollbar {
+  width: var(--axf-sidebar-scrollbar-size);
+  height: var(--axf-sidebar-scrollbar-size);
+}
+
+.axf-sidebar-navigation::-webkit-scrollbar-track,
+.axf-account-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.axf-sidebar-navigation::-webkit-scrollbar-thumb,
+.axf-account-menu::-webkit-scrollbar-thumb {
+  background-color: var(--axf-sidebar-scrollbar-thumb);
+  border-radius: calc(var(--axf-sidebar-scrollbar-size) / 2);
+}
+
+.axf-sidebar-navigation::-webkit-scrollbar-thumb:hover,
+.axf-account-menu::-webkit-scrollbar-thumb:hover {
+  background-color: var(--axf-sidebar-scrollbar-thumb-hover);
+}
+
+.axf-sidebar-navigation::-webkit-scrollbar-button,
+.axf-sidebar-navigation::-webkit-scrollbar-corner,
+.axf-account-menu::-webkit-scrollbar-button,
+.axf-account-menu::-webkit-scrollbar-corner {
+  display: none;
+  background: transparent;
 }
 
 .axf-sidebar-section {
@@ -430,6 +490,15 @@
   inset-inline-start: 0;
   inset-block-end: calc(100% + var(--axf-space-3));
   inline-size: max(100%, 15rem);
+  /*
+   * The panel is taller than the space above the trigger on short viewports.
+   * Cap it against the viewport and scroll INSIDE the panel; the ancestor
+   * sidebar deliberately no longer clips (see shell.css), so an inline
+   * max-height is the only thing standing between the panel and the header.
+   */
+  max-block-size: var(--axf-account-menu-max-block);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--axf-space-2);
   color: var(--axf-color-text-primary);
   background: var(--axf-color-surface-raised);
@@ -450,7 +519,7 @@
 .axf-account-menu-heading {
   display: flex;
   flex-direction: column;
-  padding: var(--axf-space-3);
+  padding: var(--axf-space-2) var(--axf-space-3);
 }
 
 .axf-account-menu-heading strong { font-size: var(--axf-sidebar-type-label); }
@@ -493,9 +562,19 @@
 .axf-account-menu-group > :is(a, button) small { margin-inline-start: auto; color: var(--axf-color-text-tertiary); }
 
 @media (max-width: 47.99em) {
+  /*
+   * Mobile: a bottom sheet instead of a popover.
+   *
+   * The trigger lives at the end of the drawer, so a panel anchored above it
+   * would be squeezed against the header. Pinning the sheet to the bottom
+   * edge keeps every item reachable and makes the height follow the content;
+   * `max-block-size` plus internal scrolling covers short viewports.
+   */
   .axf-account-menu {
     position: fixed;
-    inset: var(--axf-space-4);
+    inset-inline: var(--axf-space-4);
+    inset-block-start: auto;
+    inset-block-end: var(--axf-space-4);
     inline-size: auto;
     max-block-size: calc(100dvh - var(--axf-space-8));
     overflow-y: auto;
@@ -602,7 +681,7 @@
   .axf-shell[data-sidebar-collapsed='true'] .axf-workspace-card { block-size: var(--axf-sidebar-item-height); min-block-size: var(--axf-sidebar-item-height); background: transparent; border-color: transparent; }
   .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-brand { flex-direction: column; }
   .axf-shell[data-sidebar-collapsed='true'] .axf-sidebar-logo { flex: 0 0 auto; }
-  .axf-shell[data-sidebar-collapsed='true'] .axf-account-menu { inset-inline-start: calc(100% + var(--axf-space-4)); inset-block-end: 0; inline-size: 15rem; transform-origin: bottom left; }
+  .axf-shell[data-sidebar-collapsed='true'] .axf-account-menu { inset-inline-start: calc(100% + var(--axf-space-4)); inset-block-end: 0; inline-size: 15rem; max-block-size: calc(100dvh - var(--axf-header-height) - var(--axf-space-3)); transform-origin: bottom left; }
 }
 
 /* ======================================================================

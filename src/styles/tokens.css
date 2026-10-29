@@ -147,6 +147,13 @@
   --axf-color-border: var(--axf-neutral-700);
   --axf-color-border-strong: var(--axf-neutral-500);
 
+  /*
+   * Native scrollbar chrome. The thumb must read as part of the surface, not
+   * as a bright OS control; hover borrows the accent only as a quiet signal.
+   */
+  --axf-color-scrollbar-thumb: var(--axf-neutral-500);
+  --axf-color-scrollbar-thumb-hover: var(--axf-color-accent);
+
   --axf-color-link: var(--axf-gold-300);
   --axf-color-link-visited: var(--axf-gold-400);
   --axf-color-focus: var(--axf-gold-300);
@@ -190,6 +197,26 @@
   --axf-sidebar-tracking-control: 0.08em;
   --axf-sidebar-tracking-meta: 0.06em;
 
+  /*
+   * Sidebar scrollbars only. Scoped to the one scroll container so tables,
+   * editors, and other surfaces keep their own scrollbar treatment.
+   */
+  --axf-sidebar-scrollbar-size: 6px;
+  --axf-sidebar-scrollbar-thumb: var(--axf-color-scrollbar-thumb);
+  --axf-sidebar-scrollbar-thumb-hover: var(--axf-color-scrollbar-thumb-hover);
+
+  /*
+   * Room above the account trigger once the menu opens upward:
+   *   footer card (item height + space-4) + footer top padding + inner bottom
+   *   padding + the 12px gap above the card. The extra 1px absorbs sub-pixel
+   *   footer rounding so the panel never slips under the sticky header.
+   */
+  --axf-account-menu-max-block: calc(
+    100dvh - var(--axf-header-height) - var(--axf-sidebar-item-height) -
+      var(--axf-space-4) - var(--axf-space-3) - var(--axf-space-3) -
+      var(--axf-space-3) - 1px
+  );
+
   --axf-header-bg: var(--axf-color-surface);
   --axf-header-border: var(--axf-color-border);
 
@@ -211,6 +238,7 @@
   --axf-color-text-inverse: var(--axf-neutral-0);
   --axf-color-border: #c9c6bd;
   --axf-color-border-strong: var(--axf-neutral-500);
+  --axf-color-scrollbar-thumb: var(--axf-neutral-400);
   --axf-color-link: #80621f;
   --axf-color-link-visited: #6f531b;
   --axf-color-focus: #80621f;
