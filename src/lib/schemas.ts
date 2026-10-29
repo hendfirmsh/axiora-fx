@@ -147,10 +147,31 @@ export const glossaryEntrySchema = sharedMetadata.extend({
   difficulty: z.enum(DIFFICULTIES),
 });
 
-/** Macro Event — dated event context for briefs. */
+/** Macro Event — dated event context for briefs and Calendar. */
 export const macroEventSchema = sharedMetadata.extend({
-  contentType: z.literal('macro-event'),
+  contentType: z.literal('macro-events'),
+  /** ISO calendar date of the release, yyyy-mm-dd. */
   eventDate: z.coerce.date(),
+  /** 24-hour release time in the source timezone, HH:MM. */
+  releaseTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/),
+  /** IANA timezone of the release time (e.g., "America/New_York"). */
+  releaseTimezone: z.string().min(1),
+  /** Release country/region (ISO 3166-1 alpha-2). */
+  country: z.string().length(2),
+  /** Currency most affected (ISO 4217). */
+  currency: z.string().length(3),
+  /** Market-impact tier. */
+  impact: z.enum(['high', 'medium', 'low']),
+  /** Human-readable indicator name (Indonesian). */
+  indicator: z.string().min(1),
+  /** Prior print. Optional. */
+  previous: z.string().optional(),
+  /** Market consensus/forecast. Optional. */
+  forecast: z.string().optional(),
+  /** Released value. Optional; null/absent means not yet released. */
+  actual: z.string().optional(),
+  /** Optional expandable note (methodology, caveat). */
+  note: z.string().optional(),
 });
 
 /** Schema lookup by collection name, for the fixture harness. */

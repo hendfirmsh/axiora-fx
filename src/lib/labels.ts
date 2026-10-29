@@ -43,7 +43,7 @@ export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   'market-brief': 'Market Brief',
   'education-article': 'Penjelasan Konsep',
   'glossary-entry': 'Entri Glosarium',
-  'macro-event': 'Peristiwa Makro',
+  'macro-events': 'Peristiwa Makro',
 };
 
 /** Difficulty labels. */

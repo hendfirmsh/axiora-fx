@@ -133,9 +133,9 @@ const READINESS: Record<string, ReadinessRecord> = {
       'Pencarian bekerja atas korpus statis yang telah dipublikasikan. Karena belum ada catatan yang dipublikasikan, indeks pencarian masih kosong.',
   },
   [ROUTES.calendar.path]: {
-    state: 'unavailable',
+    state: 'ready',
     reason:
-      'Antarmuka kalender rilis ekonomi sudah dibangun, tetapi sumber data sesungguhnya belum terhubung dan data yang ditampilkan masih contoh pengembangan. Halaman ini hanya menampilkan data contoh dalam build pengembangan, bukan data produksi.',
+      'Kalender rilis ekonomi menggunakan data editorial Macro Event yang telah disetujui untuk publikasi. Data ditampilkan dalam WIB dengan filter hari, mata uang, dan tingkat dampak.',
   },
 
   // --- Future-gated: reserved, NOT an MVP route ------------------------

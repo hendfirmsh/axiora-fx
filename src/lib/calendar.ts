@@ -1,16 +1,18 @@
 /**
  * AXIORA Market Calendar — data model and helpers.
  *
- * Authority: user instruction (AXIORA Market Calendar feature, 2026-08-29).
+ * Authority: user instruction (AXIORA Market Calendar feature, 2026-08-29),
+ *            final report Phase D.
  *
  * This module is pure and framework-free so it can be unit-tested in plain Node
- * (no Astro runtime). It deliberately knows nothing about rendering or about
- * whether a build is production or development — that decision lives in the page,
- * which only calls getCalendarEvents() under a development build.
+ * (no Astro runtime). It deliberately knows nothing about rendering.
  *
- * DATA SAFETY: the dataset returned here is development-only illustrative data
- * (see calendar-source.ts). It must never be presented as live or approved
- * economic data.
+ * DATA SAFETY:
+ * - getCalendarEvents() returns development-only illustrative data.
+ *   It must never be presented as live or approved economic data.
+ * - getCalendarEventsFromMacroEvents() loads approved editorial Macro Events.
+ *   Only records with publicationState="production" and public lifecycle status
+ *   are included. Missing values are represented as unavailable, never fabricated.
  */
 
 import { CALENDAR_EVENTS_DEV, CALENDAR_DEV_NOTICE } from './calendar-source.ts';
@@ -59,13 +61,31 @@ export const DEV_NOTICE = CALENDAR_DEV_NOTICE;
 /**
  * Development calendar dataset, sorted by date then time.
  *
- * Under a production build the page never calls this; see getCalendarEventsSafe().
+ * This is DEVELOPMENT-ONLY illustrative data. It must never be presented as
+ * live or approved economic data. The page uses this only in development builds.
  */
 export function getCalendarEvents(): CalendarEvent[] {
   return [...CALENDAR_EVENTS_DEV].sort((a, b) => {
     if (a.date !== b.date) return a.date.localeCompare(b.date);
     return a.time.localeCompare(b.time);
   });
+}
+
+/**
+ * Load approved editorial Macro Events and convert to CalendarEvent[].
+ *
+ * This is the PRODUCTION data source. It loads only records with:
+ *   - publicationState === "production"
+ *   - public lifecycle status (published, updated, corrected, archived, deprecated, superseded)
+ *
+ * Missing values (previous, forecast, actual, note) are represented as undefined,
+ * never fabricated. Actual values that are not yet released are represented as null.
+ *
+ * Returns empty array if no approved events exist.
+ */
+export async function getCalendarEventsFromMacroEvents(): Promise<CalendarEvent[]> {
+  const { getCalendarEventsFromMacroEvents } = await import('./calendar-adapter.ts');
+  return getCalendarEventsFromMacroEvents();
 }
 
 /** Distinct currencies present in a dataset, sorted alphabetically. */

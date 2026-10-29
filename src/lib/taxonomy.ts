@@ -19,7 +19,7 @@ export const CONTENT_TYPES = [
   'market-brief',
   'education-article',
   'glossary-entry',
-  'macro-event',
+  'macro-events',
 ] as const;
 
 /**
@@ -175,7 +175,7 @@ export const CONTENT_TYPE_NAVIGATION: Record<
   'market-brief': ['market-intelligence'],
   'education-article': ['education'],
   'glossary-entry': ['reference'],
-  'macro-event': ['market-intelligence'],
+  'macro-events': ['market-intelligence'],
 };
 
 /** Content types that must carry at least one source. */
@@ -183,7 +183,7 @@ export const SOURCE_REQUIRED_TYPES = [
   'market-brief',
   'education-article',
   'glossary-entry',
-  'macro-event',
+  'macro-events',
 ] as const;
 
 export type ContentType = (typeof CONTENT_TYPES)[number];

@@ -3,30 +3,32 @@
  * Market Calendar page.
  *
  * Authority: user instruction (AXIORA Market Calendar feature, 2026-08-29),
- *            04_Workspace_Architecture/09_Reading_Flows.md (Unavailable state).
+ *            04_Workspace_Architecture/09_Reading_Flows.md (Unavailable state),
+ *            final report Phase D.
  *
- * DUAL BEHAVIOUR (intentional, not a bug):
+ * BEHAVIOUR:
  *
  *   - Development build (AXIORA_ENV unset or 'development'): render the full
  *     calendar interface populated with DEVELOPMENT-ONLY illustrative data, with a
  *     prominent banner stating the data is not real. This lets the interface be
  *     built, reviewed, and tested without any fabricated production data.
  *
- *   - Production build: the interface must never ship fabricated economic data,
- *     so we render the standard unavailable-route placeholder instead. PendingRoutePage
- *     throws under a production build, which is the correct release-gate failure.
+ *   - Production build: render the calendar interface using approved editorial
+ *     Macro Event records. If no approved events exist, show an honest empty state
+ *     instead of fabricating data. The route is now publishable when content exists.
  *
- * This satisfies the hard constraint: no fabricated production economic data, and
- * the development sample is clearly separated and labelled.
+ * This satisfies the hard constraint: no fabricated production economic data,
+ * and the development sample is clearly separated and labelled.
  */
 
 import WorkspaceLayout from '../../layouts/WorkspaceLayout.astro';
 import PendingRoutePage from '../../layouts/PendingRoutePage.astro';
 import { ROUTES } from '../../lib/routes.ts';
-import { showDevelopmentMarkers } from '../../lib/env.ts';
+import { showDevelopmentMarkers, isProductionBuild } from '../../lib/env.ts';
 import { asset } from '../../lib/url.ts';
 import {
   getCalendarEvents,
+  getCalendarEventsFromMacroEvents,
   groupByDate,
   currenciesIn,
   datesIn,
@@ -34,16 +36,27 @@ import {
   IMPACT_LABELS,
   DEV_NOTICE,
 } from '../../lib/calendar.ts';
+import type { CalendarEvent } from '../../lib/calendar.ts';
 
 const devBuild = showDevelopmentMarkers();
+const productionBuild = isProductionBuild();
 
-const events = getCalendarEvents();
+// In dev: use dev fixture. In production: load approved macro-events.
+const events = devBuild
+  ? getCalendarEvents()
+  : await getCalendarEventsFromMacroEvents();
+
 const groups = groupByDate(events);
 const currencies = currenciesIn(events);
 const dates = datesIn(events);
+
+// Determine if we have any approved content in production
+const hasApprovedContent = productionBuild && events.length > 0;
+const showUnavailablePlaceholder = productionBuild && !hasApprovedContent;
 ---
 
 {
+  // Development build: show dev data with notice
   devBuild ? (
     <WorkspaceLayout
       title={ROUTES.calendar.title}
@@ -68,6 +81,7 @@ const dates = datesIn(events);
           <strong>Data pengembangan.</strong> {DEV_NOTICE}
         </p>
 
+        <!-- Calendar Filters -->
         <form class="axf-calendar-filters" data-calendar-filters>
           <div class="axf-field">
             <label for="cal-filter-date">Hari</label>
@@ -99,8 +113,144 @@ const dates = datesIn(events);
         </p>
 
         <div class="axf-calendar-tables">
-          {
-            groups.map((group) => (
+          {groups.map((group) => (
+            <table
+              class="axf-calendar-table"
+              data-calendar-table
+              data-date={group.date}
+            >
+              <caption>{longDateLabel(group.date)}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Waktu</th>
+                  <th scope="col">Negara</th>
+                  <th scope="col">Dampak</th>
+                  <th scope="col">Indikator</th>
+                  <th scope="col">Sebelumnya</th>
+                  <th scope="col">Konsensus</th>
+                  <th scope="col">Aktual</th>
+                </tr>
+              </thead>
+              {group.events.map((event) => (
+                <tbody
+                  class="axf-calendar-event"
+                  data-calendar-event
+                  data-currency={event.currency}
+                  data-impact={event.impact}
+                >
+                  <tr class="axf-calendar-row">
+                    <td data-label="Waktu">
+                      <span class="axf-cal-time">{event.time}</span>
+                      <span class="axf-cal-tz">{event.timezone}</span>
+                    </td>
+                    <td data-label="Negara">
+                      <span class="axf-cal-country">{event.country}</span>
+                      <span class="axf-cal-currency">{event.currency}</span>
+                    </td>
+                    <td data-label="Dampak">
+                      <span class={`axf-impact axf-impact-${event.impact}`}>
+                        {IMPACT_LABELS[event.impact]}
+                      </span>
+                    </td>
+                    <td data-label="Indikator">
+                      <details class="axf-cal-details">
+                        <summary>{event.title}</summary>
+                        {event.note && <p class="axf-cal-note">{event.note}</p>}
+                        {!event.note && (
+                          <p class="axf-cal-note">
+                            Data pengembangan — bukan rilis sesungguhnya.
+                          </p>
+                        )}
+                      </details>
+                    </td>
+                    <td data-label="Sebelumnya">{event.previous ?? '—'}</td>
+                    <td data-label="Konsensus">{event.forecast ?? '—'}</td>
+                    <td data-label="Aktual">{event.actual ?? '—'}</td>
+                  </tr>
+                </tbody>
+              ))}
+            </table>
+          ))}
+        </div>
+      </section>
+
+      <script is:inline defer src={asset('/scripts/calendar.js')}></script>
+    </WorkspaceLayout>
+  ) : (
+    // Production build
+    showUnavailablePlaceholder ? (
+      // No approved macro-events yet — show unavailable placeholder
+      <PendingRoutePage
+        path={ROUTES.calendar.path}
+        title={ROUTES.calendar.title}
+        description={ROUTES.calendar.description}
+        breadcrumbs={[
+          { label: 'AXIORA', path: ROUTES.home.path },
+          { label: ROUTES.calendar.title },
+        ]}
+      />
+    ) : (
+      // Approved macro-events exist — render the calendar
+      <WorkspaceLayout
+        title={ROUTES.calendar.title}
+        description={ROUTES.calendar.description}
+        breadcrumbs={[
+          { label: 'AXIORA', path: ROUTES.home.path },
+          { label: ROUTES.calendar.title },
+        ]}
+        indexable={false}
+      >
+        <section class="axf-calendar" aria-labelledby="axf-calendar-heading">
+          <header class="axf-calendar-intro">
+            <p class="axf-eyebrow">Market</p>
+            <h1 id="axf-calendar-heading">Calendar</h1>
+            <p class="axf-calendar-lede">
+              Kalender rilis ekonomi makro. Saring berdasarkan hari, mata uang, dan
+              tingkat dampak. Waktu ditampilkan dalam WIB.
+            </p>
+          </header>
+
+          {events.length === 0 && (
+            <p class="axf-calendar-empty" data-calendar-empty>
+              Belum ada rilis ekonomi yang dijadwalkan.
+            </p>
+          )}
+
+          <!-- Calendar Filters -->
+          <form class="axf-calendar-filters" data-calendar-filters>
+            <div class="axf-field">
+              <label for="cal-filter-date">Hari</label>
+              <select id="cal-filter-date" data-filter="date">
+                <option value="all">Semua hari</option>
+                {dates.map((d) => <option value={d}>{longDateLabel(d)}</option>)}
+              </select>
+            </div>
+            <div class="axf-field">
+              <label for="cal-filter-currency">Mata uang</label>
+              <select id="cal-filter-currency" data-filter="currency">
+                <option value="all">Semua mata uang</option>
+                {currencies.map((c) => <option value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div class="axf-field">
+              <label for="cal-filter-impact">Dampak</label>
+              <select id="cal-filter-impact" data-filter="impact">
+                <option value="all">Semua dampak</option>
+                <option value="high">{IMPACT_LABELS.high}</option>
+                <option value="medium">{IMPACT_LABELS.medium}</option>
+                <option value="low">{IMPACT_LABELS.low}</option>
+              </select>
+            </div>
+          </form>
+
+          {events.length === 0 && (
+            <p class="axf-calendar-empty" data-calendar-empty>
+              Belum ada rilis ekonomi yang dijadwalkan.
+            </p>
+          )}
+
+          <div class="axf-calendar-tables">
+            {groups.map((group) => (
               <table
                 class="axf-calendar-table"
                 data-calendar-table
@@ -145,35 +295,31 @@ const dates = datesIn(events);
                           {event.note && <p class="axf-cal-note">{event.note}</p>}
                           {!event.note && (
                             <p class="axf-cal-note">
-                              Data pengembangan — bukan rilis sesungguhnya.
+                              Data editorial — rilis ekonomi makro yang disetujui.
                             </p>
                           )}
                         </details>
                       </td>
                       <td data-label="Sebelumnya">{event.previous ?? '—'}</td>
                       <td data-label="Konsensus">{event.forecast ?? '—'}</td>
-                      <td data-label="Aktual">{event.actual ?? '—'}</td>
+                      <td data-label="Aktual">
+                        {event.actual !== undefined && event.actual !== null ? (
+                          event.actual
+                        ) : (
+                          <span class="axf-actual-pending">Belum dirilis</span>
+                        )}
+                      </td>
                     </tr>
                   </tbody>
                 ))}
               </table>
-            ))
-          }
-        </div>
-      </section>
+            ))}
+          </div>
 
-      <script is:inline defer src={asset('/scripts/calendar.js')}></script>
-    </WorkspaceLayout>
-  ) : (
-    <PendingRoutePage
-      path={ROUTES.calendar.path}
-      title={ROUTES.calendar.title}
-      description={ROUTES.calendar.description}
-      breadcrumbs={[
-        { label: 'AXIORA', path: ROUTES.home.path },
-        { label: ROUTES.calendar.title },
-      ]}
-    />
+          <script is:inline defer src={asset('/scripts/calendar.js')}></script>
+        </section>
+      </WorkspaceLayout>
+    )
   )
 }
 
@@ -370,6 +516,18 @@ const dates = datesIn(events);
     margin: var(--axf-space-2) 0 0;
     font-size: var(--axf-font-size-xs);
     color: var(--axf-color-text-tertiary);
+  }
+
+  .axf-actual-pending {
+    color: var(--axf-color-text-tertiary);
+    font-style: italic;
+  }
+
+  .axf-calendar-last-updated {
+    margin: var(--axf-space-4) 0 0;
+    font-size: var(--axf-font-size-xs);
+    color: var(--axf-color-text-tertiary);
+    text-align: right;
   }
 
   /* Responsive: table becomes stacked cards on narrow viewports. */
