@@ -54,6 +54,7 @@ const APPROVED_SCRIPTS = [
   'account-menu',
   'search-filter',
   'calendar',
+  'news',
   // Firebase Auth is isolated to the explicitly approved private Console route.
   'ConsoleApp.astro_astro_type_script',
 ];
@@ -171,6 +172,43 @@ async function main() {
       : unapproved.length > 0
         ? `Unapproved client script(s): ${unapproved.join(', ')}`
         : `${jsFiles.length} approved script(s), ${totalJsBytes} bytes total.`,
+  );
+
+  // --- Credential scan: no Marketaux token may reach static output -------
+  // The feed is public JSON and the page is public HTML. A token in either is a
+  // leak, so this gate fails the build rather than trusting the fetch script.
+  const textExtensions = new Set([
+    '.html',
+    '.js',
+    '.mjs',
+    '.json',
+    '.css',
+    '.xml',
+    '.txt',
+    '.svg',
+    '.webmanifest',
+  ]);
+  const tokenValue = process.env.MARKETAUX_API_TOKEN?.trim();
+  const credentialMarkers = [/MARKETAUX_API_TOKEN/, /[?&]api_token=/i];
+  const credentialHits = [];
+
+  for (const f of rel) {
+    if (!textExtensions.has(extname(f))) continue;
+    const content = await readFile(join(DIST, f), 'utf8');
+    const markerHit = credentialMarkers.some((marker) => marker.test(content));
+    const tokenHit = Boolean(tokenValue && tokenValue.length >= 8 && content.includes(tokenValue));
+    if (markerHit || tokenHit) credentialHits.push(f);
+  }
+
+  record(
+    9,
+    'No Marketaux credential in static output',
+    credentialHits.length === 0,
+    credentialHits.length === 0
+      ? tokenValue
+        ? 'Scanned emitted HTML/JS/JSON/CSS; no token value or credential marker found.'
+        : 'Scanned emitted HTML/JS/JSON/CSS; no credential marker found (no token configured locally).'
+      : `Credential material found in: ${credentialHits.join(', ')}`,
   );
 
   // --- Completeness: every required route was emitted --------------------

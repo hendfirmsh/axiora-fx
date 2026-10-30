@@ -137,6 +137,12 @@ const READINESS: Record<string, ReadinessRecord> = {
     reason:
       'Kalender rilis ekonomi menggunakan data editorial Macro Event yang telah disetujui untuk publikasi. Data ditampilkan dalam WIB dengan filter hari, mata uang, dan tingkat dampak.',
   },
+  [ROUTES.news.path]: {
+    // Readiness is a build-out/content state, not an SEO decision. The feed is
+    // implemented and emits an honest empty state before its first fetch; it is
+    // deliberately noindex in ROUTES because the snippets are syndicated.
+    state: 'ready',
+  },
 
   // --- Future-gated: reserved, NOT an MVP route ------------------------
   //

@@ -24,13 +24,21 @@ npm run verify:gate
 
 The build is static and emitted to `dist/`.
 
+## Intelligence News
+
+`/news/` renders the static feed at `public/data/news/latest.json`. The feed is
+refreshed by `.github/workflows/news.yml` every 30 minutes using the
+`MARKETAUX_API_TOKEN` Actions secret, then validated, built, committed only when
+it changed, and deployed through `deploy-pages.yml`.
+
+See [NEWS.md](NEWS.md) for the data contract, provider limits, local commands,
+failure policy, retention, and the current noindex/licensing caveat.
+
 ## Deployment
 
-The production site is hosted on Firebase Hosting under project `axiora-fx-hendfirmsh`.
-
-```bash
-firebase deploy --only hosting --project "axiora-fx-hendfirmsh" --non-interactive
-```
+The production site is hosted on GitHub Pages at `https://axiora.my.id/`. Pushing
+`main` runs `.github/workflows/deploy-pages.yml`, which builds, verifies, and
+deploys `dist/`.
 
 ## Status
 

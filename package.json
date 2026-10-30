@@ -18,6 +18,8 @@
     "test:url": "node --test \"tests/url.test.ts\"",
     "verify:static": "node scripts/verify-static.mjs",
     "verify:links": "node scripts/verify-links.mjs",
+    "news:fetch": "node scripts/fetch-news.mjs",
+    "news:validate": "node scripts/validate-news.mjs",
     "verify:gate": "npm run check && npm test && npm run build && npm run verify:static && npm run verify:links",
     "build:production": "node scripts/build-production.mjs"
   },

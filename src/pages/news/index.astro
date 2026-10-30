@@ -1,0 +1,833 @@
+---
+/**
+ * AXIORA Intelligence News.
+ *
+ * Authority: user instruction (AXIORA Intelligence News, 2026-10-30),
+ *            IMPLEMENTATION_CONTRACT.md Section 5 (static-first; no backend),
+ *            04_Workspace_Architecture/09_Reading_Flows.md (empty/unavailable
+ *            states must state their condition honestly).
+ *
+ * The feed is pre-rendered from public/data/news/latest.json, which the scheduled
+ * GitHub Actions pipeline writes. The browser never calls Marketaux and never
+ * receives the API token. Category filters and search are pure enhancements over
+ * already-rendered cards; with JavaScript unavailable every card remains visible.
+ *
+ * Loading state: not applicable by design. There is no client fetch, so the HTML
+ * arrives with its final content. Empty, error, stale, and no-results states are
+ * rendered explicitly. No skeleton or fake article is ever shown.
+ */
+
+import WorkspaceLayout from '../../layouts/WorkspaceLayout.astro';
+import { ROUTES } from '../../lib/routes.ts';
+import { asset, url } from '../../lib/url.ts';
+import { loadNewsFeed } from '../../lib/news-feed.ts';
+import {
+  NEWS_CATEGORIES,
+  NEWS_CATEGORY_LABELS,
+  NEWS_STALE_HOURS,
+  articleSearchText,
+  formatWib,
+  formatWibShort,
+  newsFeedFreshness,
+  type NewsArticle,
+  type NewsCategoryId,
+} from '../../lib/news.ts';
+
+const loaded = await loadNewsFeed();
+const feed = loaded.feed;
+const items = feed.items;
+const hasItems = loaded.state === 'ok' && items.length > 0;
+const freshness = loaded.state === 'ok' ? newsFeedFreshness(feed) : 'empty';
+const isStale = freshness === 'stale';
+
+const categoryCounts = new Map<NewsCategoryId, number>();
+for (const item of items) {
+  categoryCounts.set(item.category, (categoryCounts.get(item.category) ?? 0) + 1);
+}
+
+const lastUpdatedLabel = feed.generated_at ? formatWib(feed.generated_at) : null;
+
+function entitySummary(article: NewsArticle): string {
+  const labels = article.entities
+    .map((entity) => entity.symbol ?? entity.name)
+    .filter((label): label is string => Boolean(label));
+  return labels.length > 0 ? labels.join(', ') : 'Tidak ada entitas yang teridentifikasi.';
+}
+---
+
+<WorkspaceLayout
+  title={ROUTES.news.title}
+  description={ROUTES.news.description}
+  breadcrumbs={[
+    { label: 'AXIORA', path: ROUTES.home.path },
+    { label: ROUTES.news.title },
+  ]}
+  indexable={ROUTES.news.indexable}
+>
+  <section class="axf-news" aria-labelledby="axf-news-heading" data-news-root>
+    <header class="axf-news-intro">
+      <p class="axf-eyebrow">AXIORA / MARKET INTELLIGENCE</p>
+      <h1 id="axf-news-heading">AXIORA Intelligence News</h1>
+      <p class="axf-news-lede">
+        Feed berita pasar global yang dikurasi secara otomatis: judul asli, ringkasan
+        singkat, sumber penerbit, dan konteks instrumen. Waktu ditampilkan dalam WIB.
+      </p>
+
+      <div class="axf-news-statusline">
+        <span>
+          <strong>Diperbarui:</strong>{' '}
+          {lastUpdatedLabel ?? 'Belum ada pembaruan'}
+        </span>
+        <span><strong>Zona waktu:</strong>{' '}WIB</span>
+        <span><strong>Jumlah:</strong>{' '}{items.length} berita</span>
+      </div>
+
+      <p class="axf-news-attribution">
+        <strong>Atribusi.</strong> Judul, ringkasan, dan tautan berasal dari{' '}
+        <a href="https://www.marketaux.com/" target="_blank" rel="noopener noreferrer">Marketaux</a>{' '}
+        dan penerbit aslinya. Hak cipta tetap pada penerbit. AXIORA tidak menyalin
+        artikel penuh dan tidak mengubah judul. Kategori adalah klasifikasi otomatis
+        AXIORA, bukan klasifikasi penerbit.
+      </p>
+    </header>
+
+    {loaded.state === 'error' ? (
+      <div class="axf-empty-state axf-news-state-error" role="alert">
+        <h2 class="axf-empty-state-title">Feed berita tidak dapat dimuat</h2>
+        <p class="axf-empty-state-body">
+          {loaded.error ?? 'Data feed tidak lolos validasi.'}
+        </p>
+        <p class="axf-empty-state-body">
+          Halaman lain tetap dapat digunakan. Pipeline tidak menampilkan berita
+          contoh atau data yang belum tervalidasi sebagai pengganti.
+        </p>
+      </div>
+    ) : !hasItems ? (
+      <div class="axf-empty-state" role="status">
+        <h2 class="axf-empty-state-title">Belum ada berita yang tersedia</h2>
+        <p class="axf-empty-state-body">
+          Feed Intelligence News belum memiliki entri. Pipeline mengambil berita
+          dari Marketaux setiap 30 menit dan menyimpannya sebagai data statis
+          setelah lolos validasi.
+        </p>
+        <p class="axf-empty-state-body">
+          Halaman ini tidak memanggil Marketaux dari browser dan tidak menampilkan
+          berita contoh.
+        </p>
+      </div>
+    ) : (
+      <>
+        <p
+          class="axf-news-stale"
+          role="status"
+          data-news-stale
+          data-news-generated={feed.generated_at}
+          data-news-stale-hours={NEWS_STALE_HOURS}
+          hidden={!isStale}
+        >
+          <strong>Data mungkin tertunda.</strong> Feed terakhir diperbarui
+          {lastUpdatedLabel ? ` ${lastUpdatedLabel}` : ' sebelum batas waktu yang diketahui'}.
+          Pipeline dijadwalkan setiap 30 menit; berita yang sudah ada tetap
+          ditampilkan. Batas stale saat ini {NEWS_STALE_HOURS} jam.
+        </p>
+
+        <form
+          class="axf-news-controls"
+          role="search"
+          action={url(ROUTES.news.path)}
+          method="get"
+          data-news-controls
+          data-news-total={items.length}
+        >
+          <div class="axf-news-search">
+            <label for="axf-news-search">Cari berita</label>
+            <div class="axf-news-search-row">
+              <input
+                id="axf-news-search"
+                class="axf-news-search-input"
+                type="search"
+                name="q"
+                placeholder="Cari judul, penerbit, simbol"
+                autocomplete="off"
+                spellcheck="false"
+                aria-describedby="axf-news-search-hint"
+                data-news-search
+              />
+              <button type="button" class="axf-news-button" data-news-clear disabled>
+                Hapus
+              </button>
+            </div>
+            <p class="axf-news-hint" id="axf-news-search-hint">
+              Cari berdasarkan judul, nama penerbit, entitas, kategori, atau simbol
+              instrumen seperti XAUUSD, USD, atau Brent.
+            </p>
+          </div>
+
+          <fieldset class="axf-news-filter">
+            <legend>Kategori</legend>
+            <div class="axf-news-filter-buttons">
+              <button
+                type="button"
+                class="axf-news-filter-button"
+                data-news-category="all"
+                aria-pressed="true"
+                aria-controls="axf-news-results"
+              >
+                Semua <span class="axf-news-filter-count">{items.length}</span>
+              </button>
+              {NEWS_CATEGORIES.map((category) => (
+                <button
+                  type="button"
+                  class="axf-news-filter-button"
+                  data-news-category={category.id}
+                  aria-pressed="false"
+                  aria-controls="axf-news-results"
+                >
+                  {category.label}{' '}
+                  <span class="axf-news-filter-count">
+                    {categoryCounts.get(category.id) ?? 0}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <button type="button" class="axf-news-button" data-news-reset disabled>
+            Atur ulang
+          </button>
+        </form>
+
+        <p class="axf-news-result-status" role="status" aria-live="polite" aria-atomic="true" data-news-status>
+          Menampilkan {items.length} dari {items.length} berita.
+        </p>
+
+        <p class="axf-news-js-note" data-news-js-note>
+          Filter dan pencarian memerlukan JavaScript. Tanpa JavaScript, semua berita
+          di bawah tetap dapat dibaca.
+        </p>
+
+        <div class="axf-news-grid" id="axf-news-results" data-news-list>
+          {items.map((article) => {
+            const excerpt = article.snippet ?? article.description;
+            return (
+              <article
+                class="axf-news-card"
+                data-news-item
+                data-category={article.category}
+                data-search={articleSearchText(article)}
+                aria-labelledby={`axf-news-title-${article.id}`}
+              >
+                <div class="axf-news-card-meta">
+                  <span class="axf-news-card-category">
+                    {NEWS_CATEGORY_LABELS[article.category]}
+                  </span>
+                  <time class="axf-news-card-time" datetime={article.published_at}>
+                    {formatWibShort(article.published_at)}
+                  </time>
+                </div>
+
+                <h2 class="axf-news-card-title" id={`axf-news-title-${article.id}`}>
+                  <a
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    lang={article.language ?? undefined}
+                  >
+                    {article.title}
+                  </a>
+                </h2>
+
+                {excerpt && (
+                  <p class="axf-news-card-excerpt" lang={article.language ?? undefined}>
+                    {excerpt}
+                  </p>
+                )}
+
+                <p class="axf-news-card-source">
+                  <span>{article.source_domain}</span>
+                  {article.language && (
+                    <>
+                      <span aria-hidden="true"> · </span>
+                      <span lang={article.language}>{article.language.toUpperCase()}</span>
+                    </>
+                  )}
+                </p>
+
+                {article.instruments.length > 0 && (
+                  <ul class="axf-news-card-instruments" aria-label="Instrumen terkait">
+                    {article.instruments.map((instrument) => (
+                      <li class="axf-news-instrument" title={instrument.symbol}>
+                        {instrument.label}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <details class="axf-news-card-details">
+                  <summary>Metadata &amp; atribusi</summary>
+                  <dl class="axf-news-card-fields">
+                    <dt>Penerbit</dt>
+                    <dd>{article.source}</dd>
+                    <dt>Kategori</dt>
+                    <dd>
+                      {NEWS_CATEGORY_LABELS[article.category]}{' '}
+                      <span class="axf-news-generated">
+                        (klasifikasi otomatis AXIORA)
+                      </span>
+                    </dd>
+                    <dt>Entitas</dt>
+                    <dd>{entitySummary(article)}</dd>
+                    <dt>Bahasa</dt>
+                    <dd>{article.language ?? 'Tidak tersedia'}</dd>
+                    <dt>ID feed</dt>
+                    <dd><code>{article.id}</code></dd>
+                  </dl>
+                  <p class="axf-news-classification-note">
+                    Kategori ditetapkan oleh aturan internal AXIORA berdasarkan judul,
+                    ringkasan, dan entitas. Penerbit tidak menetapkan kategori ini.
+                  </p>
+                </details>
+
+                <div class="axf-news-card-footer">
+                  <a
+                    class="axf-news-source-link"
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    aria-label={`Baca "${article.title}" di ${article.source_domain} (membuka tab baru)`}
+                  >
+                    Baca di penerbit <span aria-hidden="true">↗</span>
+                  </a>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        <div class="axf-news-no-results" data-news-empty hidden>
+          <h2>Tidak ada berita yang cocok</h2>
+          <p>
+            Coba kata kunci lain, pilih kategori lain, atau atur ulang filter untuk
+            menampilkan seluruh feed.
+          </p>
+          <button type="button" class="axf-news-button" data-news-empty-reset>
+            Atur ulang filter
+          </button>
+        </div>
+
+        <footer class="axf-news-footer">
+          <p>
+            <strong>Sumber data:</strong>{' '}
+            <a href="https://www.marketaux.com/" target="_blank" rel="noopener noreferrer">
+              Marketaux
+            </a>. Setiap kartu menautkan ke artikel asli penerbit. AXIORA tidak
+            menyediakan salinan artikel penuh.
+          </p>
+          <p>
+            Feed diperbarui oleh pipeline statis setiap 30 menit. Tidak ada panggilan
+            Marketaux dari browser dan tidak ada token API di halaman ini.
+          </p>
+        </footer>
+
+        <script is:inline defer src={asset('/scripts/news.js')}></script>
+      </>
+    )}
+  </section>
+</WorkspaceLayout>
+
+<style>
+  .axf-news {
+    display: flex;
+    flex-direction: column;
+    gap: var(--axf-space-6);
+    min-inline-size: 0;
+    max-inline-size: 76rem;
+  }
+
+  .axf-eyebrow {
+    margin: 0;
+    color: var(--axf-color-text-tertiary);
+    font-size: var(--axf-font-size-xs);
+    letter-spacing: var(--axf-sidebar-tracking-section);
+    text-transform: uppercase;
+  }
+
+  .axf-news-intro {
+    display: flex;
+    flex-direction: column;
+    gap: var(--axf-space-3);
+  }
+
+  .axf-news-intro h1 {
+    margin: 0;
+    color: var(--axf-color-text-primary);
+    font-size: var(--axf-font-size-2xl);
+    line-height: var(--axf-line-height-tight);
+    overflow-wrap: anywhere;
+  }
+
+  .axf-news-lede {
+    margin: 0;
+    max-inline-size: var(--axf-measure-reading);
+    color: var(--axf-color-text-secondary);
+    font-size: var(--axf-font-size-md);
+    line-height: var(--axf-line-height-normal);
+  }
+
+  .axf-news-statusline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--axf-space-2) var(--axf-space-4);
+    color: var(--axf-color-text-tertiary);
+    font-size: var(--axf-font-size-sm);
+  }
+
+  .axf-news-statusline strong {
+    color: var(--axf-color-text-secondary);
+    font-weight: var(--axf-font-weight-medium);
+  }
+
+  .axf-news-attribution {
+    margin: 0;
+    max-inline-size: var(--axf-measure-supporting);
+    padding: var(--axf-space-3) var(--axf-space-4);
+    border-inline-start: var(--axf-border-width-thick) solid var(--axf-color-border-strong);
+    border-radius: var(--axf-radius-sm);
+    background: var(--axf-color-surface-subtle);
+    color: var(--axf-color-text-secondary);
+    font-size: var(--axf-font-size-sm);
+    line-height: var(--axf-line-height-normal);
+  }
+
+  .axf-news-attribution strong {
+    color: var(--axf-color-text-primary);
+  }
+
+  .axf-news-stale {
+    margin: 0;
+    padding: var(--axf-space-3) var(--axf-space-4);
+    border: var(--axf-border-width) solid var(--axf-color-border-strong);
+    border-radius: var(--axf-radius-md);
+    background: var(--axf-color-surface-subtle);
+    color: var(--axf-color-text-secondary);
+    font-size: var(--axf-font-size-sm);
+    line-height: var(--axf-line-height-normal);
+  }
+
+  .axf-news-stale strong {
+    color: var(--axf-color-text-primary);
+  }
+
+  .axf-news-state-error {
+    border-color: var(--axf-color-state-attention);
+  }
+
+  .axf-news-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--axf-space-4);
+    margin: 0;
+    padding: var(--axf-space-4);
+    border: var(--axf-border-width) solid var(--axf-color-border);
+    border-radius: var(--axf-radius-md);
+    background: var(--axf-color-surface-subtle);
+  }
+
+  .axf-news-search {
+    display: flex;
+    flex: 1 1 22rem;
+    flex-direction: column;
+    gap: var(--axf-space-2);
+    min-inline-size: 0;
+  }
+
+  .axf-news-search label,
+  .axf-news-filter legend {
+    padding: 0;
+    color: var(--axf-color-text-tertiary);
+    font-size: var(--axf-font-size-xs);
+    font-weight: var(--axf-font-weight-semibold);
+    letter-spacing: var(--axf-sidebar-tracking-control);
+    text-transform: uppercase;
+  }
+
+  .axf-news-search-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--axf-touch-target-gap);
+    min-inline-size: 0;
+  }
+
+  .axf-news-search-input {
+    flex: 1 1 12rem;
+    min-inline-size: 0;
+    min-block-size: var(--axf-touch-target-min);
+    padding: var(--axf-space-2) var(--axf-space-3);
+    color: var(--axf-color-text-primary);
+    background: var(--axf-color-surface);
+    border: var(--axf-border-width) solid var(--axf-color-border-strong);
+    border-radius: var(--axf-radius-md);
+    font: inherit;
+    font-size: var(--axf-font-size-base);
+  }
+
+  .axf-news-search-input:focus-visible {
+    outline: var(--axf-focus-ring-width) solid var(--axf-color-focus);
+    outline-offset: var(--axf-focus-ring-offset);
+  }
+
+  .axf-news-hint {
+    margin: 0;
+    color: var(--axf-color-text-tertiary);
+    font-size: var(--axf-font-size-xs);
+    line-height: var(--axf-line-height-snug);
+  }
+
+  .axf-news-filter {
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .axf-news-filter legend {
+    margin-block-end: var(--axf-space-2);
+  }
+
+  .axf-news-filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--axf-touch-target-gap);
+  }
+
+  .axf-news-filter-button,
+  .axf-news-button {
+    min-block-size: var(--axf-touch-target-min);
+    padding: var(--axf-space-2) var(--axf-space-3);
+    color: var(--axf-color-text-secondary);
+    background: var(--axf-color-surface);
+    border: var(--axf-border-width) solid var(--axf-color-border);
+    border-radius: var(--axf-radius-md);
+    font: inherit;
+    font-size: var(--axf-font-size-sm);
+    line-height: var(--axf-line-height-tight);
+    cursor: pointer;
+    transition:
+      background var(--axf-duration-fast) var(--axf-easing-standard),
+      border-color var(--axf-duration-fast) var(--axf-easing-standard),
+      color var(--axf-duration-fast) var(--axf-easing-standard);
+  }
+
+  .axf-news-filter-button:hover,
+  .axf-news-button:hover:not(:disabled) {
+    color: var(--axf-color-text-primary);
+    background: var(--axf-color-surface-raised);
+    border-color: var(--axf-color-border-strong);
+  }
+
+  .axf-news-filter-button[aria-pressed='true'] {
+    color: var(--axf-color-text-primary);
+    background: var(--axf-color-surface-raised);
+    border-color: var(--axf-color-accent);
+    font-weight: var(--axf-font-weight-semibold);
+  }
+
+  .axf-news-filter-count {
+    color: var(--axf-color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--axf-font-weight-regular);
+  }
+
+  .axf-news-button:disabled {
+    color: var(--axf-color-text-tertiary);
+    border-style: dashed;
+    cursor: not-allowed;
+  }
+
+  /* The reset button belongs to the controls as a whole, not to the search
+     field, so it sits at the end of its wrapped row on wide screens. */
+  .axf-news-controls > .axf-news-button:last-child {
+    margin-inline-start: auto;
+  }
+
+  .axf-news-result-status {
+    margin: 0;
+    color: var(--axf-color-text-secondary);
+    font-size: var(--axf-font-size-sm);
+  }
+
+  .axf-news-js-note {
+    margin: 0;
+    color: var(--axf-color-text-tertiary);
+    font-size: var(--axf-font-size-xs);
+  }
+
+  .axf-news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    align-items: start;
+    gap: var(--axf-space-4);
+    min-inline-size: 0;
+  }
+
+  /* The UA [hidden] rule loses to an authored `display` declaration. Filtering
+     relies on it, so make the hidden state explicit instead of assuming it. */
+  .axf-news-grid[hidden],
+  .axf-news-card[hidden] {
+    display: none;
+  }
+
+  .axf-news-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--axf-space-3);
+    min-inline-size: 0;
+    padding: var(--axf-space-5);
+    background: var(--axf-color-surface-subtle);
+    border: var(--axf-border-width) solid var(--axf-color-border);
+    border-radius: var(--axf-radius-md);
+  }
+
+  .axf-news-card:hover {
+    border-color: var(--axf-color-border-strong);
+  }
+
+  .axf-news-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--axf-space-2);
+  }
+
+  .axf-news-card-category {
+    color: var(--axf-color-link);
+    font-size: var(--axf-font-size-xs);
+    font-weight: var(--axf-font-weight-semibold);
+    letter-spacing: var(--axf-sidebar-tracking-control);
+    text-transform: uppercase;
+  }
+
+  .axf-news-card-time {
+    color: var(--axf-color-text-tertiary);
+    font-size: var(--axf-font-size-xs);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .axf-news-card-title {
+    margin: 0;
+    font-size: var(--axf-font-size-md);
+    line-height: var(--axf-line-height-snug);
+    overflow-wrap: anywhere;
+  }
+
+  .axf-news-card-title a {
+    color: var(--axf-color-text-primary);
+    text-decoration: none;
+  }
+
+  .axf-news-card-title a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  .axf-news-card-excerpt {
+    margin: 0;
+    color: var(--axf-color-text-secondary);
+    font-size: var(--axf-font-size-sm);
+    line-height: var(--axf-line-height-normal);
+    overflow-wrap: anywhere;
+  }
+
+  .axf-news-card-source {
+    margin: 0;
+    color: var(--axf-color-text-tertiary);
+    font-size: var(--axf-font-size-xs);
+    overflow-wrap: anywhere;
+  }
+
+  .axf-news-card-instruments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--axf-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .axf-news-instrument {
+    padding: var(--axf-space-1) var(--axf-space-2);
+    border: var(--axf-border-width) solid var(--axf-color-border);
+    border-radius: var(--axf-radius-sm);
+    color: var(--axf-color-text-secondary);
+    font-size: var(--axf-font-size-xs);
+    line-height: var(--axf-line-height-tight);
+    overflow-wrap: anywhere;
+  }
+
+  .axf-news-card-details {
+    padding-block-start: var(--axf-space-2);
+    border-block-start: var(--axf-border-width) solid var(--axf-color-border);
+    color: var(--axf-color-text-secondary);
+    font-size: var(--axf-font-size-xs);
+    line-height: var(--axf-line-height-normal);
+  }
+
+  .axf-news-card-details summary {
+    display: flex;
+    inline-size: 100%;
+    min-block-size: var(--axf-touch-target-min);
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--axf-space-2);
+    color: var(--axf-color-text-secondary);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .axf-news-card-details summary::after {
+    content: '+';
+    color: var(--axf-color-text-tertiary);
+    font-size: var(--axf-font-size-sm);
+  }
+
+  .axf-news-card-details[open] summary::after {
+    content: '−';
+  }
+
+  .axf-news-card-details summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .axf-news-card-details summary:focus-visible {
+    outline: var(--axf-focus-ring-width) solid var(--axf-color-focus);
+    outline-offset: var(--axf-focus-ring-offset);
+  }
+
+  .axf-news-card-fields {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: var(--axf-space-1) var(--axf-space-3);
+    margin: 0;
+    padding-block-start: var(--axf-space-2);
+    overflow-wrap: anywhere;
+  }
+
+  .axf-news-card-fields dt {
+    color: var(--axf-color-text-tertiary);
+  }
+
+  .axf-news-card-fields dd {
+    margin: 0;
+  }
+
+  .axf-news-card-fields code {
+    font-family: var(--axf-font-family-mono);
+    font-size: var(--axf-font-size-xs);
+    overflow-wrap: anywhere;
+  }
+
+  .axf-news-generated,
+  .axf-news-classification-note {
+    color: var(--axf-color-text-tertiary);
+  }
+
+  .axf-news-classification-note {
+    margin: var(--axf-space-2) 0 0;
+  }
+
+  .axf-news-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--axf-space-3);
+    margin-block-start: auto;
+    padding-block-start: var(--axf-space-2);
+  }
+
+  .axf-news-source-link {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--axf-touch-target-min);
+    color: var(--axf-color-link);
+    font-size: var(--axf-font-size-sm);
+    font-weight: var(--axf-font-weight-medium);
+  }
+
+  .axf-news-no-results {
+    padding: var(--axf-space-6);
+    border: var(--axf-border-width) dashed var(--axf-color-border-strong);
+    border-radius: var(--axf-radius-md);
+    background: var(--axf-color-surface-subtle);
+  }
+
+  .axf-news-no-results h2 {
+    margin: 0 0 var(--axf-space-2);
+    font-size: var(--axf-font-size-lg);
+  }
+
+  .axf-news-no-results p {
+    margin: 0 0 var(--axf-space-4);
+    max-inline-size: var(--axf-measure-reading);
+    color: var(--axf-color-text-secondary);
+  }
+
+  .axf-news-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--axf-space-2);
+    margin-block-start: var(--axf-space-4);
+    padding-block-start: var(--axf-space-4);
+    border-block-start: var(--axf-border-width) solid var(--axf-color-border);
+    color: var(--axf-color-text-tertiary);
+    font-size: var(--axf-font-size-xs);
+    line-height: var(--axf-line-height-normal);
+  }
+
+  .axf-news-footer p {
+    margin: 0;
+    max-inline-size: var(--axf-measure-supporting);
+  }
+
+  .axf-news-footer strong {
+    color: var(--axf-color-text-secondary);
+  }
+
+  @media (max-width: 40em) {
+    .axf-news-controls {
+      padding: var(--axf-space-3);
+    }
+
+    .axf-news-controls > .axf-news-button:last-child {
+      inline-size: 100%;
+      margin-inline-start: 0;
+    }
+
+    .axf-news-card {
+      padding: var(--axf-space-4);
+    }
+
+    .axf-news-card-fields {
+      grid-template-columns: 1fr;
+    }
+
+    .axf-news-card-fields dt {
+      margin-block-start: var(--axf-space-1);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .axf-news-card,
+    .axf-news-controls,
+    .axf-news-filter-button,
+    .axf-news-button,
+    .axf-news-search-input,
+    .axf-news-instrument,
+    .axf-news-no-results {
+      border-color: CanvasText;
+    }
+  }
+</style>

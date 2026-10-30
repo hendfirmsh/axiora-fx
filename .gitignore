@@ -21,5 +21,8 @@ Desktop.ini
 *.log
 npm-debug.log*
 
+# News pipeline atomic-write intermediates
+public/data/news/*.tmp
+
 # Verification scratch (throwaway records for the compatibility gate)
 src/content/**/__gate-*.mdx

@@ -38,6 +38,16 @@ export const ROUTES = {
     description: 'Kumpulan brief terkurasi bertanggal dari korpus AXIORA yang telah dipublikasikan.',
     indexable: true,
   },
+  news: {
+    path: '/news/',
+    title: 'Intelligence News',
+    description:
+      'Feed berita pasar dari Marketaux: judul, ringkasan singkat, sumber asli, kategori otomatis AXIORA, dan waktu WIB.',
+    // Syndicated provider snippets are not AXIORA editorial content. The route is
+    // implemented and usable, but it is deliberately noindex until the provider's
+    // redistribution terms are confirmed for this publication.
+    indexable: false,
+  },
   marketIntelligence: {
     path: '/market-intelligence/',
     title: 'Market Intelligence',
@@ -161,7 +171,7 @@ export const NAVIGATION: NavGroup[] = [
   {
     label: 'Market',
      items: [
-       { label: 'News', path: ROUTES.todaysBrief.path, icon: 'news' },
+       { label: 'News', path: ROUTES.news.path, icon: 'news' },
        { label: 'Calendar', path: ROUTES.calendar.path, icon: 'calendar' },
        { label: 'Oil', path: topicPath('oil'), icon: 'oil' },
       { label: 'Inflation', path: topicPath('inflation'), icon: 'inflation' },

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "provider": {
+    "id": "marketaux",
+    "name": "Marketaux",
+    "url": "https://www.marketaux.com/",
+    "endpoint": "https://api.marketaux.com/v1/news/all"
+  },
+  "generated_at": null,
+  "retention": {
+    "days": 7,
+    "max_items": 120
+  },
+  "attribution": {
+    "provider": "Marketaux",
+    "provider_url": "https://www.marketaux.com/",
+    "notice": "Judul, ringkasan, dan tautan disediakan oleh Marketaux dan penerbit aslinya. Hak cipta tetap pada penerbit. AXIORA tidak menyalin artikel penuh dan tidak mengubah judul. Kategori adalah klasifikasi otomatis AXIORA, bukan klasifikasi penerbit."
+  },
+  "count": 0,
+  "items": []
+}

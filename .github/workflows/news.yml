@@ -1,0 +1,92 @@
+name: Refresh Intelligence News feed
+
+# Authority: user instruction (AXIORA Intelligence News, 2026-10-30),
+#            IMPLEMENTATION_CONTRACT.md Section 5 (static-first pipeline).
+#
+# Every run fetches one Marketaux page, merges it into the last valid static
+# feed, validates it, and commits ONLY if the feed actually changed. The feed
+# commit is made with GITHUB_TOKEN, which does not trigger other workflows, so
+# the deploy workflow is dispatched explicitly at the end.
+#
+# Failure policy: a missing secret, HTTP error, timeout, malformed payload, or
+# invalid feed fails this workflow and leaves the committed feed untouched.
+
+on:
+  schedule:
+    # Every 30 minutes. Free plan allows 100 requests/day; this uses 48.
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  # Never cancel a run that may be mid-write. Queue instead.
+  group: news-feed-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch and merge Marketaux feed
+        env:
+          MARKETAUX_API_TOKEN: ${{ secrets.MARKETAUX_API_TOKEN }}
+          NEWS_FETCH_LIMIT: '3'
+        run: npm run news:fetch
+
+      - name: Validate static feed
+        run: npm run news:validate
+
+      - name: Build and verify before committing
+        env:
+          AXIORA_SITE: https://axiora.my.id
+          AXIORA_BASE: /
+        run: |
+          npm run build
+          npm run verify:static
+          npm run verify:links
+
+      - name: Commit changed feed only
+        id: commit
+        run: |
+          if git diff --quiet -- public/data/news/latest.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No feed change; nothing to commit."
+            exit 0
+          fi
+          git config user.name "axiora-news-bot"
+          git config user.email "axiora-news-bot@users.noreply.github.com"
+          git add public/data/news/latest.json
+          git commit -m "Refresh Intelligence News feed"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Push feed commit
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          # A human push may land during the fetch. Rebase once, then retry.
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main
+
+      - name: Trigger Pages deployment
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref main
